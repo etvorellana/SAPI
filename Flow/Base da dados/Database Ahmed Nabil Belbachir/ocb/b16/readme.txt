@@ -1,0 +1,1 @@
+Last two pictures (xxx5 and xxx6) are taken with both the two incandescent lights an the ambient light (Fluo).
