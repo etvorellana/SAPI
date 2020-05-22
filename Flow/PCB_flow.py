@@ -8,6 +8,11 @@ import skimage
 import time
 #import picamera
 
+##############################  CORREÇÕES A SEREM FEITAS    ##############################
+######  * Correção da normalização de cores, coreção do DCT
+######  * Correção do skimage para conversão YIQ
+######  * Correção do erro de overflow na busca do limiar de algumas imagens
+
 
 ######  Bloco Inicial
 
@@ -300,7 +305,7 @@ def threshold(src, dst):
     #   Busca pelo limiar da imagem
     while (con_L0 != con_L1) and cont < 100:
         cont += 1
-        print(cont, con_L1, con_H1, Y_med)
+        #(cont, con_L1, con_H1, Y_med)
         sum_L = 0
         sum_H = 0
         con_L0 = con_L1
@@ -424,7 +429,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description = 'Detecção de solda')
     parser.add_argument('--arquivo', action = 'store', dest = 'src', default = 'foto', required = False, help = 'Nome do arquivo de imagem ou "foto" para utilizar a camera')
     parser.add_argument('-filtro', type = int, action = 'store', dest = 'filtro', default = 1, required = False, help = 'Tipo se filtro a ser aplicado: 1- Sem Filtro; 2 - Median Blur; 3 - Gaussian Blur ')
-    parser.add_argument('-borda', type = int, action = 'store', dest = 'borda', default = 1, required = False, help = 'Tipo de detecção de borda a ser aplicado: 1- Corner Harris; 2 - Hough Lines')
+    parser.add_argument('-borda', type = int, action = 'store', dest = 'borda', default = 1, required = False, help = 'Tipo de detecção de borda a ser aplicado: 1- Corner Harris 2 - Hough Lines')
     
     arguments = parser.parse_args()
 
