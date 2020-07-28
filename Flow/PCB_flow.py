@@ -3,13 +3,12 @@ import argparse
 import math
 import cv2 as cv
 import numpy as np
-import skimage
-#from skimage.color import rgb2yiq
+#import skimage
+from skimage.color import rgb2yiq
 import time
 #import picamera
 
 ##############################  CORREÇÕES A SEREM FEITAS    ##############################
-######  * Correção da normalização de cores, coreção do DCT
 ######  * Correção do skimage para conversão YIQ
 ######  * Correção do erro de overflow na busca do limiar de algumas imagens
 
@@ -162,7 +161,7 @@ def CornerPespec(srcRGB):
     pts2 = np.float32([[0,0],[dm,0],[0,dn],[dm,dn]])
 
     matrix = cv.getPerspectiveTransform(pts1, pts2)
-    result = cv.warpPerspective(img, matrix, (dm, dn))
+    result = cv.warpPerspective(srcRGB, matrix, (dm, dn))
     resultGray = cv.cvtColor(result,cv.COLOR_BGR2GRAY)
 
 ##    cv.circle(srcRGB,(plt[1],plt[0]), 10, (0,0,255), -1)
@@ -291,7 +290,11 @@ def colorN(srcRGB, N=5):
 #####   BLOCO ONDE É REALIZADA A CONVERSÃO PARA YIQ, THRESHOLD E BINARIZAÇÃO
 def threshold(src, dst):
 
-    cutYIQ = skimage.color.rgb2yiq(src) #   Utilizando o pacote skimage é realizada a transformação para o espaço de cor YIQ
+    #cutYIQ = rgb2yiq(src) #   Utilizando o pacote skimage é realizada a transformação para o espaço de cor YIQ
+    cutYIQ = np.copy(src)
+
+    cv.imwrite("YIQ.png", cutYIQ)
+
     thrGrey = np.zeros_like(dst) 
     Y_min = cutYIQ[:, :, 0].min() # Menor pixel com cor
     Y_max = cutYIQ[:, :, 0].max() # Maior pixel com cor
@@ -305,7 +308,7 @@ def threshold(src, dst):
     #   Busca pelo limiar da imagem
     while (con_L0 != con_L1) and cont < 100:
         cont += 1
-        #(cont, con_L1, con_H1, Y_med)
+        #print(cont, con_L1, con_H1, Y_med)
         sum_L = 0
         sum_H = 0
         con_L0 = con_L1
@@ -363,6 +366,7 @@ def segment_01(thrGrey, normRGB):
 
     #   Inverte a Imagem do floodfill
     im_floodfill_inv = cv.bitwise_not(im_floodfill)
+    cv.imwrite("flodfill_inv.png", im_floodfill_inv)
     '''
     cv.namedWindow("Inverted Floodfilled Image", cv.WINDOW_NORMAL)
     cv.imshow("Inverted Floodfilled Image", im_floodfill_inv)
@@ -370,6 +374,7 @@ def segment_01(thrGrey, normRGB):
 
     #   Combine as duas imagens para obter a areas de interesse
     im_out = thrGrey | im_floodfill_inv
+    cv.imwrite("im_out.png", im_out) 
     '''
     cv.namedWindow("Combined Floodfilled Image", cv.WINDOW_NORMAL)
     cv.imshow("Combined Floodfilled Image", im_out)
@@ -380,6 +385,7 @@ def segment_01(thrGrey, normRGB):
 
     # print("hierarchy: ", hierarchy.shape)
     # print("contours: ", len(contours))
+    soldas = 0
     sections = []
     for c in contours:
         M = cv.moments(c)
@@ -391,6 +397,8 @@ def segment_01(thrGrey, normRGB):
                 sections.append((cX, cY, x, y, w, h))
                 # cv.circle(img, (cX, cY), 2, (255, 255, 255), -1)
                 cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 1)
+                soldas = soldas + 1
+    print("Quantidade de soldas: ", soldas)
 
     # print("sections: ", len(sections))
     # externs = []
@@ -414,11 +422,13 @@ def segment_01(thrGrey, normRGB):
     #     (AcX, AcY, Ax, Ay, Aw, Ah) = c
     #     cv.circle(img, (AcX, AcY), 2, (255, 255, 255), -1)
     #     cv.rectangle(img, (Ax, Ay), (Ax + Aw, Ay + Ah), (0, 0, 255), 2)
-    '''
+    
+    cv.imwrite("soldas.png", img)
+
+
     cv.namedWindow("Segmented Image", cv.WINDOW_NORMAL)
     cv.imshow("Segmented Image", img)
-    print("contours: ", len(sections))
-    '''
+
     return sections
 
 
@@ -429,7 +439,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description = 'Detecção de solda')
     parser.add_argument('--arquivo', action = 'store', dest = 'src', default = 'foto', required = False, help = 'Nome do arquivo de imagem ou "foto" para utilizar a camera')
     parser.add_argument('-filtro', type = int, action = 'store', dest = 'filtro', default = 1, required = False, help = 'Tipo se filtro a ser aplicado: 1- Sem Filtro; 2 - Median Blur; 3 - Gaussian Blur ')
-    parser.add_argument('-borda', type = int, action = 'store', dest = 'borda', default = 1, required = False, help = 'Tipo de detecção de borda a ser aplicado: 1- Corner Harris 2 - Hough Lines')
+    parser.add_argument('-borda', type = int, action = 'store', dest = 'borda', default = 1, required = False, help = 'Tipo de detecção de borda a ser aplicado: 1- Corner Harris; 2 - Hough Lines')
     
     arguments = parser.parse_args()
 
@@ -438,6 +448,8 @@ def main(argv):
         srcGrey, srcRGB = takepic() #   Chama função da camera
     else:
         srcGrey, srcRGB = loadImage(arguments.src) # Carrega Imagem
+        cv.imwrite("srcGrey_Original.png", srcGrey);
+        cv.imwrite("srcRGB_Original.png", srcRGB);
     '''
     cv.namedWindow("Original Grey", cv.WINDOW_NORMAL)
     cv.imshow("Original Grey", srcGrey)
@@ -456,6 +468,9 @@ def main(argv):
     ##  Decção de bordas
     if (arguments.borda == 1):
         srcRGB, srcGrey = CornerPespec(srcRGB)
+        cv.imwrite("srcGrey_Corner.png", srcGrey)
+        cv.imwrite("srcRGB_Corner.png", srcRGB)
+
     else:
         edges = edgesDetection(srcGrey)
         '''
@@ -494,18 +509,25 @@ def main(argv):
     #   Normalização de cor
     # print(cutRGB[:, :, 0].shape)
     normRGB = colorN(srcRGB, 5)
+    #normRGB = np.copy(srcRGB)
+    cv.imwrite("normRGB.png", normRGB)
+
     '''
     cv.namedWindow("Normalize - RGB", cv.WINDOW_NORMAL)
     cv.imshow("Normalize - RGB", normRGB)
     '''
     # Thresholding
     thrGrey = threshold(normRGB, srcGrey)
+    cv.imwrite("thrGrey.png", thrGrey)
+
     #thrGrey = threshold(srcRGB, srcGrey)
     '''
     cv.namedWindow("YIQ - Thresold", cv.WINDOW_NORMAL)
     cv.imshow("YIQ - Thresold", thrGrey)
-    '''
+   '''
     segList = segment_01(thrGrey, normRGB)
+    print("Lista de solda: ",len(segList))
+    #print(segList)
     cv.waitKey()
     return 0
 
