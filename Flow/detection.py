@@ -3,6 +3,7 @@ import numpy as np
 import math
 import sys
 import imutils
+import argparse
 from skimage.color import rgb2yiq
 
 # carrega imagem
@@ -185,51 +186,51 @@ def set_perspective(points, image):
 # detecta a placa
 # recebe: diretório da imagem
 # retorna: imagem contendo apenas a placa
-def find_object(image_file):
+def find_object(image_file, results_path):
     # carregar imagem
     image = load_image(image_file)
-    cv2.imwrite("../results/image_"+image_file[10:], image)
-    #cv2.namedWindow("image "+image_file[10:], cv2.WINDOW_NORMAL)
-    #cv2.imshow("image "+image_file[10:], image)
+    cv2.imwrite(results_path+"image_"+image_file[12:], image)
+    #cv2.namedWindow("image "+image_file[12:], cv2.WINDOW_NORMAL)
+    #cv2.imshow("image "+image_file[12:], image)
 
     # binarização da imagem
     mask = thresholding(image)
-    cv2.imwrite("../results/thresholding_"+image_file[10:], mask)
-    #cv2.namedWindow("thresholding "+image_file[10:], cv2.WINDOW_NORMAL)
-    #cv2.imshow("thresholding "+image_file[10:], mask)
+    cv2.imwrite(results_path+"thresholding_"+image_file[12:], mask)
+    #cv2.namedWindow("thresholding "+image_file[12:], cv2.WINDOW_NORMAL)
+    #cv2.imshow("thresholding "+image_file[12:], mask)
 
     # maior contorno (placa)
     contour, image_contour = max_area_contour(mask, image.copy())
-    cv2.imwrite("../results/contour_"+image_file[10:], image_contour)
-    #cv2.namedWindow("contour "+image_file[10:], cv2.WINDOW_NORMAL)
-    #cv2.imshow("contour "+image_file[10:], image_contour)
+    cv2.imwrite(results_path+"contour_"+image_file[12:], image_contour)
+    #cv2.namedWindow("contour "+image_file[12:], cv2.WINDOW_NORMAL)
+    #cv2.imshow("contour "+image_file[12:], image_contour)
 
     # aproximação da forma
     approx_contour = hull(contour, image)
-    cv2.imwrite("../results/approx_contour_"+image_file[10:], approx_contour)
-    #cv2.namedWindow("approx. contour "+image_file[10:], cv2.WINDOW_NORMAL)
-    #cv2.imshow("approx. contour "+image_file[10:], approx_contour)
+    cv2.imwrite(results_path+"approx_contour_"+image_file[12:], approx_contour)
+    #cv2.namedWindow("approx. contour "+image_file[12:], cv2.WINDOW_NORMAL)
+    #cv2.imshow("approx. contour "+image_file[12:], approx_contour)
 
     # detectar cantos
     centroids, corners, image_corners = get_corners(approx_contour, image.copy())
-    cv2.imwrite("../results/corners_"+image_file[10:], image_corners)
-    #cv2.namedWindow("corners "+image_file[10:], cv2.WINDOW_NORMAL)
-    #cv2.imshow("corners "+image_file[10:], image_corners)
+    cv2.imwrite(results_path+"corners_"+image_file[12:], image_corners)
+    #cv2.namedWindow("corners "+image_file[12:], cv2.WINDOW_NORMAL)
+    #cv2.imshow("corners "+image_file[12:], image_corners)
 
     # perspective
     # top_left, bottom_left, top_right, bottom_right
     points = order_points(corners)
     perspective = set_perspective(points, image.copy())
-    cv2.imwrite("../results/perspective_"+image_file[10:], perspective)
-    #cv2.namedWindow("perspective "+image_file[10:], cv2.WINDOW_NORMAL)
-    #cv2.imshow("perspective "+image_file[10:], perspective)
+    cv2.imwrite(results_path+"perspective_"+image_file[12:], perspective)
+    #cv2.namedWindow("perspective "+image_file[12:], cv2.WINDOW_NORMAL)
+    #cv2.imshow("perspective "+image_file[12:], perspective)
 
 # divide a imagem em várias plaquinhas menores e desenha círculos onde deveriam haver soldas pegando os pontos de um arquivo .txt
 # recebe: imagem
 # retorna: imagem com linhas delimitando as plaquinhas
-def division(image_file):
+def division(image_file, welds_file):
     # arquivo .txt com a posição das soldas (porcentagem em relação ao tamanho da placa)
-    file = open("new.txt", "r")
+    file = open(welds_file, "r")
     soldas = []
     for line in file:
         line = line.split()
@@ -289,18 +290,26 @@ def main():
     print("OpenCV2: ", cv2.__version__)
     print("NumPy: ", np.__version__)
 
+    # argumentos de linha de comando (pasta para colocar as imagens geradas)
+    ap = argparse.ArgumentParser()
+    ap.add_argument("-p", "--results_path", required=True, help="path for the resulting images")
+    args = vars(ap.parse_args())
+    results_path = args["results_path"]
+    #print(type(results_path))
+
     # detectar somente a placa do resto da imagem
-    images_file = ["../images/PCB_01_ilumin_03.jpg", "../images/PCB_01_ilumin_06.jpg"]
+    images_file = ["../Pictures/PCB_01_ilumin_03.jpg", "../Pictures/PCB_01_ilumin_06.jpg"]
     for image_file in images_file:
-        find_object(image_file)
+        find_object(image_file, results_path)
 
     # divisão da imagem em plaquinhas menores
-    images_file = ["../results/perspective_PCB_01_ilumin_03.jpg", "../results/perspective_PCB_01_ilumin_06.jpg"]
+    images_file = [results_path+"perspective_PCB_01_ilumin_03.jpg", results_path+"perspective_PCB_01_ilumin_06.jpg"]
+    welds_file = 'welds.txt'
     for image_file in images_file:
-        divided_rgb = division(image_file)
-        cv2.imwrite("../results/divided_rgb_"+image_file[23:], divided_rgb)
-        cv2.namedWindow("divided "+image_file, cv2.WINDOW_NORMAL)
-        cv2.imshow("divided "+image_file, divided_rgb)
+        divided_rgb = division(image_file, welds_file)
+        cv2.imwrite(results_path+"divided_rgb_"+image_file[23:], divided_rgb)
+        #cv2.namedWindow("divided "+image_file, cv2.WINDOW_NORMAL)
+        #cv2.imshow("divided "+image_file, divided_rgb)
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()

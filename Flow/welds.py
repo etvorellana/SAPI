@@ -1,5 +1,5 @@
-arquivo = open("soldas.txt", "r")
-novo = open("new.txt", "w")
+arquivo = open("welds_image.txt", "r")
+novo = open("welds.txt", "w")
 
 for line in arquivo:
     line = line.split()
