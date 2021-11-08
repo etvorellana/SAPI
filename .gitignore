@@ -1,0 +1,17 @@
+# Nome da pasta do ambiente virtual
+rpi-cam-prototype-env
+
+# ==================================
+# Criando o ambiente virtual
+# py -m venv rpi-cam-prototype-env
+
+# Usando ambiente virtual
+# .\rpi-cam-prototype-env\Scripts\activate
+
+# Sair do ambiente virtual
+# deactivate
+
+# Comando
+# python PCB_flow.py --arquivo '.\Base da dados\Pi camera\PCB_001.png'
+# python PCB_flow_opt4.py --arquivo '.\Base da dados\Pi camera\PCB_001.png'
+# python PCB_flow_opt4_snorm.py --arquivo '.\Base da dados\Pi camera\PCB_001.png'
