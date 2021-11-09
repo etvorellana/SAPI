@@ -11,7 +11,5 @@ rpi-cam-prototype-env
 # Sair do ambiente virtual
 # deactivate
 
-# Comando
+# Comando [utilizado a partir da pasta Flow]
 # python PCB_flow.py --arquivo '.\Base da dados\Pi camera\PCB_001.png'
-# python PCB_flow_opt4.py --arquivo '.\Base da dados\Pi camera\PCB_001.png'
-# python PCB_flow_opt4_snorm.py --arquivo '.\Base da dados\Pi camera\PCB_001.png'

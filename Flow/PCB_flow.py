@@ -3,26 +3,18 @@ import argparse
 import math
 import cv2 as cv
 import numpy as np
-import skimage
-#from skimage.color import rgb2yiq
+#import skimage
+from skimage.color import rgb2yiq
 import time
 #import picamera
-
-##############################  CORREÇÕES A SEREM FEITAS    ##############################
-######  * Correção da normalização de cores, coreção do DCT
-######  * Correção do skimage para conversão YIQ
-######  * Correção do erro de overflow na busca do limiar de algumas imagens
 
 
 ######  Bloco Inicial
 
 ##   Carrega Imagem
 def loadImage(fileName):
-    
-    srcGray = cv.imread(cv.samples.findFile(fileName), cv.IMREAD_GRAYSCALE) #   Carrega em escala de cinza
     srcRGB = cv.imread(cv.samples.findFile(fileName)) # Carrega a imagem colorida
-
-    return srcGray, srcRGB
+    return srcRGB
 
 ##   Tira uma fotografia utilizando picamera (testar no rasp) e coloca em um numpy
 def takepic():
@@ -52,133 +44,124 @@ def filter(srcGray, opt):
 
 ## Detecção de cantos e correção de pespectiva com corner Harris
 def CornerPespec(srcRGB):
-    ##  Blur para suavizar e evitar ruidos
-    dst = cv.blur(srcRGB,(5,5))
+    
+    h, w, c = srcRGB.shape
+    kernel = np.ones((5,5),np.float32)/25
 
+    
+    vert = cv.filter2D(srcRGB[:, w//2 -5:w//2 + 5, 1].copy(),-1,kernel)
+    vert = vert[:,5]
+    
+    dvert = np.zeros_like(vert, dtype=np.int16)
+    dvert[:] = vert[:]
+    dvert[1:-1] = np.abs(dvert[2:] - dvert[:-2])//2
+
+    limits = np.nonzero(dvert[10:-10] > 2.5)
+    top = limits[0][0] 
+    bot = limits[0][-1] + 20
+    
+    lt = cv.filter2D(srcRGB[top-100:top+100, :200, :].copy(),-1,kernel)
+    lb = cv.filter2D(srcRGB[bot-100:bot+100, :200, :].copy(),-1,kernel)
+    
+    rt = cv.filter2D(srcRGB[top-100:top+100, w-200:, :].copy(),-1,kernel)
+    rb = cv.filter2D(srcRGB[bot-100:bot+100, w-200:, :].copy(),-1,kernel)
+    
+    #LT
     ##  Canny
-    dst = cv.Canny(dst, 50, 100, None, 3, True)
-
-    dst = np.float32(dst)
-
+    lt = cv.Canny(lt, 50, 100, None, 3, True)
+    lt = np.float32(lt)
     ##  Detectar as quinas
-    dst = cv.cornerHarris(dst,2,3,0.04)
-
-##    cv.namedWindow('Corner',cv.WINDOW_NORMAL)
-##    cv.imshow('Corner', dst)
-
+    lt = cv.cornerHarris(lt,2,3,0.04)
     ##  Dilatação para destacar
-    dst = cv.dilate(dst,None)
-
-    N, M = dst.shape
-
-    ##  Superior Esquerdo
-    lt = (0,0)
+    lt = cv.dilate(lt,None)
+    N, M = lt.shape
     plt = (0,0)
     dlt = N**2+M**2
-
-    ##  Superior Direito
-    rt = (0,M)
+    
+    #RT
+    ##  Canny
+    rt = cv.Canny(rt, 50, 100, None, 3, True)
+    rt = np.float32(rt)
+    ##  Detectar as quinas
+    rt = cv.cornerHarris(rt,2,3,0.04)
+    ##  Dilatação para destacar
+    rt = cv.dilate(rt,None)
     prt = (0,M)
-    drt = N**2+M**2
-
-    ##  Inferior Direito
-    rb = (N,M)
+    drt = dlt
+    
+    #RB
+    ##  Canny
+    rb = cv.Canny(rb, 50, 100, None, 3, True)
+    rb = np.float32(rb)
+    ##  Detectar as quinas
+    rb = cv.cornerHarris(rb,2,3,0.04)
+    ##  Dilatação para destacar
+    rb = cv.dilate(rb,None)
     prb = (N,M)
-    drb = N**2+M**2
-
-    ##  Inferior Esquerdo
-    lb = (N,0)
+    drb = dlt
+    
+    #LB
+    ##  Canny
+    lb = cv.Canny(lb, 50, 100, None, 3, True)
+    lb = np.float32(lb)
+    ##  Detectar as quinas
+    lb = cv.cornerHarris(lb,2,3,0.04)
+    ##  Dilatação para destacar
+    lb = cv.dilate(lb,None)
     plb = (N,0)
-    dlb = N**2+M**2
-
+    dlb = dlt
+    
     ##  Calcular Distancia entre os pontos
     for i in range (0, N):
-        for j in range (0, M):
-            if (dst[i][j] != 0):
-                ##  LT
-                if (i < (N/2)) and (j < (M/2)):
-                     dltc = ((i-lt[0])**2)+((j-lt[1])**2)
-                     if (dltc < dlt):
-                         plt = (i,j)
-                         dlt = dltc
-                ##  RT
-                if (i < (N/2)) and (j > (M/2)):
-                     drtc = ((i-rt[0])**2)+((rt[1]-j)**2)
-                     if drtc < drt:
-                         prt = (i,j)
-                         drt = drtc
-                ##  RB
-                if (i > (N/2)) and (j > (M/2)):
-                     drbc = ((rb[0]-i)**2)+((rb[1]-j)**2)
-                     if drbc < drb:
-                         prb = (i,j)
-                         drb = drbc
-                ##  LB
-                if (i > (N/2)) and (j < (M/2)):
-                     dlbc = ((lb[0]-i)**2)+((j-lb[1])**2)
-                     if dlbc < dlb:
-                         plb = (i,j)
-                         dlb = dlbc
-                
-                
-##    print("coodernadas Superior Esquerda:", plt)
-##    print("coodernadas Superior Direita:", prt)
-##    print("coodernadas Inferior Direita:", prb)
-##    print("coodernadas Inferior Esquerda:", plb)
+        for j in range (0, M): # 
+            
+            if (lt[i][j] != 0):
+                dltc = (i**2)+(j**2)
+                if (dltc < dlt):
+                    plt = (i,j)
+                    dlt = dltc
+    
+            jr = M - j - 1
+            if (rt[i][jr] != 0):
+                drtc = (i**2)+(j**2)
+                if drtc < drt:
+                    prt = (i,jr)
+                    drt = drtc
+                    
+            ib = N - i - 1
+            if (rb[ib][jr] != 0):
+                drbc = (i**2)+(j**2)
+                if drbc < drb:
+                    prb = (ib,jr)
+                    drb = drbc
+            
+            if (lb[ib][j] != 0):
+                dlbc = (i**2)+(j**2)
+                if dlbc < dlb:
+                    plb = (ib,j)
+                    dlb = dlbc
+    
+    plt = (top - 100 + plt[0], plt[1])
+    prt = (top - 100 + prt[0], w-200+prt[1])
+    prb = (bot - 100 + prb[0], w-200+prb[1])
+    plb = (bot - 100 + plb[0], plb[1])
+    
+    #print(plt, prt, prb, plb)
 
-    ##  Pontos para calcular delta
-    if plt[0] < prt[0]:
-        nt = plt[0]
-    else:
-        nt = prt[0]
-    if plb[0] > prb[0]:
-        nb = plb[0]
-    else:
-        nb = prb[0]
-
-    if plt[1] < plb[1]:
-        ml = plt[1]
-    else:
-        ml = plb[1]
-        
-    if prt[1] > prb[1]:
-        mr = prt[1]
-    else:
-        mr = prb[1]
-
-    ##  DeltaN e DeltaM
-    dn = nb - nt
-    dm = mr - ml
-
-##    print ("nt:", nt)
-##    print ("nb:", nb)
-##    print ("ml:", ml)
-##    print ("mr:", mr)
-##    print ("dN:", dn)
-##    print ("dM:", dm)
+    
+    dn = 1500
+    dm = 3200
 
     ##  Corrigir a pespectiva
     pts1 = np.float32([[plt[1],plt[0]], [prt[1],prt[0]], [plb[1],plb[0]], [prb[1],prb[0]]])
     pts2 = np.float32([[0,0],[dm,0],[0,dn],[dm,dn]])
 
     matrix = cv.getPerspectiveTransform(pts1, pts2)
-    result = cv.warpPerspective(img, matrix, (dm, dn))
-    resultGray = cv.cvtColor(result,cv.COLOR_BGR2GRAY)
+    result = cv.warpPerspective(srcRGB, matrix, (dm, dn))
+    #resultGray = cv.cvtColor(result,cv.COLOR_BGR2GRAY)
 
-##    cv.circle(srcRGB,(plt[1],plt[0]), 10, (0,0,255), -1)
-##    cv.circle(srcRGB,(plb[1],plb[0]), 10, (0,255,0), -1)
-##    cv.circle(srcRGB,(prt[1],prt[0]), 10, (255,0,0), -1)
-##    cv.circle(srcRGB,(prb[1],prb[0]), 10, (0,255,255), -1)
-##
-##    cv.namedWindow('Cantos',cv.WINDOW_NORMAL)
-##    cv.imshow('Cantos', srcRGB)
-##
-##    cv.namedWindow('dst',cv.WINDOW_NORMAL)
-##    cv.imshow('dst',result)
-##
-##    cv.imwrite("Foto_seg.png", result)
-
-    return result, resultGray
+    #return result, resultGray
+    return result
 
 def edgesDetection(src, thr1=50, thr2=100, apSize=3, L2Grad=True):
 
@@ -254,83 +237,64 @@ def alignment(src, x1, y1, x2, y2):
     rot = cv.warpAffine(src, rotMat, (M, N)) #  Rotaciona a imagem com a função warpAffine
     return rot
 
-#####   BLOCO PARA NORMALIZAÇÂO DE CORES
-def colorN(srcRGB, N=5):
-    h, w, d = srcRGB.shape
-    #print(h, w, d)
-    dstRGB = np.copy(srcRGB)
-    for i in range(d):
-        miu = np.log10(srcRGB[:, :, i].mean())
-        C_00 = miu * math.sqrt(h * w)
-        # C_00 = 0
-        vis0 = np.zeros((h, w), np.float32)
-        vis3 = np.zeros((h, w), np.float32)
-        vis0[:h, :w] = srcRGB[:h, :w, i]
-        vis0 += 1
-        c = 255 / np.log10(vis0.max())
-        #print(c)
-        vis0 = c * np.log10(vis0)
-        # vis0_1 = cv.normalize(vis0, None, 0, 255, cv.NORM_MINMAX, dtype=cv.CV_8U)
-        # cv.imshow("Log", vis0_1)
-        vis1 = cv.dct(vis0)
-        # cv.imshow("DCT", vis1)
-        for k in range(N):
-            for j in range(i + 1):
-                vis1[k - j, j] = C_00
-        # cv.imshow("DCT Normalize", vis1)
+def getOptimalDCTSize(N): 
+    return 2*cv.getOptimalDFTSize((N+1)//2)
 
-        vis2 = cv.idct(vis1)
-        # vis2 = cv.normalize(vis2, None, 0, 255, cv.NORM_MINMAX, dtype=cv.CV_8U)
-        # cv.imshow("iDCT", vis2)
-        vis3 = (1.02 ** vis2) - 1
-        vis3 = cv.normalize(vis3, None, 0, 255, cv.NORM_MINMAX, dtype=cv.CV_8U)
-        dstRGB[:h, :w, i] = vis3[:h, :w]
-    # cv.imshow("iLog", vis3)
+#####   BLOCO PARA NORMALIZAÇÂO DE CORES
+#def colorN(srcRGB, srcGray):
+def colorN(dstRGB, Ddis = 15):
+    h, w, c = dstRGB.shape
+    #h_ = getOptimalDCTSize(h);
+    #w_ = getOptimalDCTSize(w);
+    vis0 = np.ones((h, w, c), np.float64)
+    vis0[:h, :w, :] += dstRGB[:, :, :]
+    #vis0[h:, :, :] = 255
+    #vis0[:, w:, :] = 255
+    vis0 = np.log10(vis0)
+    for color in range(3):
+        vis0[:,:,color] = cv.dct(vis0[:,:,color])
+        for i in range(Ddis):
+            for j in range(Ddis - i):
+                vis0[i, j, color] = 0
+        vis0[:,:,color] = cv.idct(vis0[:,:,color])
+        vis0[:,:,color] = (10.0**vis0[:,:,color]) - 1
+        dstRGB[:, :, color] = cv.normalize(vis0[:h,:w,color], None, 0, 255, cv.NORM_MINMAX, dtype=cv.CV_8U)
     return dstRGB
 
 #####   BLOCO ONDE É REALIZADA A CONVERSÃO PARA YIQ, THRESHOLD E BINARIZAÇÃO
-def threshold(src, dst):
+def threshold(dstRGB):
 
-    cutYIQ = skimage.color.rgb2yiq(src) #   Utilizando o pacote skimage é realizada a transformação para o espaço de cor YIQ
-    thrGrey = np.zeros_like(dst) 
+    cutYIQ = rgb2yiq(dstRGB)
+    #thrGray = np.zeros_like(dstGray)
     Y_min = cutYIQ[:, :, 0].min() # Menor pixel com cor
     Y_max = cutYIQ[:, :, 0].max() # Maior pixel com cor
     Y_med = (Y_max + Y_min) / 2 #   Media das cores
     cont = 0
     con_L0 = 0
-    con_H0 = 0
     con_L1 = 1
-    con_H1 = 0
-    M, N, d = cutYIQ.shape
-    #   Busca pelo limiar da imagem
-    while (con_L0 != con_L1) and cont < 100:
+    N, M, d = cutYIQ.shape
+    a = cutYIQ[:, :, 0]
+    quantT = N*M
+    while ((con_L0 != con_L1) and (cont < 100)):
         cont += 1
-        #(cont, con_L1, con_H1, Y_med)
-        sum_L = 0
-        sum_H = 0
         con_L0 = con_L1
-        con_H0 = con_H1
-        con_H1 = 0
-        con_L1 = 0
-
-        for i in range(M):
-            for j in range(N):
-                if cutYIQ[i, j, 0] < Y_med:
-                    sum_L += cutYIQ[i, j, 0]
-                    con_L1 += 1
-                else:
-                    sum_H += cutYIQ[i, j, 0]
-                    con_H1 += 1
-
-        Y_min = sum_L / con_L1
-        Y_max = sum_H / con_H1
+        b = np.where(a < Y_med, a, 0)
+        soma = b.sum()
+        quant = np.count_nonzero(b)
+        con_L1 = quant
+        Y_min = soma/quant
+        soma = a.sum() - soma;
+        quant = quantT - quant
+        #print(soma, quant, soma/quant)
+        Y_max = soma/quant
         Y_med = (Y_max + Y_min) / 2.0
-    #   Após encontrar o limiar binariza a imagem, tudo que for maior que o limiar fica branco e o que for menor preto
-    for i in range(M):
-        for j in range(N):
-            if cutYIQ[i, j, 0] >= Y_med:
-                thrGrey[i, j] = 255
-    return thrGrey #    Retorna a imagem binarizada
+
+    print(cont)
+    thrGray = np.where(a < Y_med, 0, 255)
+    #thrGray = cv.normalize(thrGray, None, 0, 255, cv.NORM_MINMAX, dtype=cv.CV_8U)
+    thrGray = np.array(thrGray, dtype=np.uint8)
+    #print(thrGray.shape)
+    return thrGray #    Retorna a imagem binarizada
 
 #####   BLOCO PARA SEGMENTAÇÂO
 def segment_01(thrGrey, normRGB):
@@ -350,36 +314,36 @@ def segment_01(thrGrey, normRGB):
         s = w - 1
     for i in range(1, s):
         if im_floodfill[i - 1 : i + 2, i - 1 : i + 2].sum() == 0:
-            # print("Ok")
             (x_0, y_0) = (i, i)
             break
 
     #   Preenchimento dos pontos (x_0, y_0)
     cv.floodFill(im_floodfill, mask, (x_0, y_0), 255)
-    '''
-    cv.namedWindow("Floodfilled Image", cv.WINDOW_NORMAL)
-    cv.imshow("Floodfilled Image", im_floodfill)
-    '''
 
     #   Inverte a Imagem do floodfill
     im_floodfill_inv = cv.bitwise_not(im_floodfill)
-    '''
-    cv.namedWindow("Inverted Floodfilled Image", cv.WINDOW_NORMAL)
-    cv.imshow("Inverted Floodfilled Image", im_floodfill_inv)
-    '''
 
     #   Combine as duas imagens para obter a areas de interesse
     im_out = thrGrey | im_floodfill_inv
-    '''
-    cv.namedWindow("Combined Floodfilled Image", cv.WINDOW_NORMAL)
-    cv.imshow("Combined Floodfilled Image", im_out)
-    '''
 
     #   Encontro os contornos
     contours, hierarchy = cv.findContours(im_out, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    
+    h1, w1 = im_out.shape
 
-    # print("hierarchy: ", hierarchy.shape)
-    # print("contours: ", len(contours))
+    w_soldaP = (1.65*w1)/285
+    w_soldaG = (3*w1)/285
+
+    h_soldaP = (1.65*h1)/130
+    h_soldaG = (3*h1)/130
+
+    soldaG = w_soldaG * h_soldaG
+    soldaP = w_soldaP * h_soldaP
+
+    soldaMh = w_soldaG / h_soldaP
+    soldaMw = w_soldaP / h_soldaG
+
+    soldas = 0
     sections = []
     for c in contours:
         M = cv.moments(c)
@@ -387,126 +351,99 @@ def segment_01(thrGrey, normRGB):
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
             x, y, w, h = cv.boundingRect(c)
-            if (abs(w - h) < 25) and ((w * h) < 600) and ((w * h) > 200):
+            #if (abs(w - h) < 25) and ((w * h) < 600) and ((w * h) > 200):
+            #if (abs(w - h) < 80) and ((w * h) < 2116) and ((w * h) > 200):
+            if ((w / h) >= soldaMw) and ((w / h) <= soldaMh) and ((w * h) <= soldaG) and ((w * h) >= soldaP):
                 sections.append((cX, cY, x, y, w, h))
                 # cv.circle(img, (cX, cY), 2, (255, 255, 255), -1)
-                cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 1)
+                #cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
+                if (w>=h):
+                    r = w//2
+                else:
+                    r = h//2
+                cv.circle(img, (x+w//2, y+h//2), r, (0, 0, 255), 2)
+                soldas = soldas + 1
+    print("Quantidade de soldas: ", soldas)
 
-    # print("sections: ", len(sections))
-    # externs = []
-    # for i in range(len(sections)):
-    #     (AcX, AcY, Ax, Ay, Aw, Ah) = sections[i]
-    #     for j in range(len(sections)):
-    #         if i != j:
-    #             (BcX, BcY, Bx, By, Bw, Bh) = sections[j]
-    #             # print(j, " - B: ", sections[j])
-    #             if (
-    #                 (BcX > Ax)
-    #                 and (BcX < (Ax + Aw))
-    #                 and (BcY > Ay)
-    #                 and (BcY < (Ay + Ah))
-    #             ):
-    #                 externs.append((AcX, AcY, Ax, Ay, Aw, Ah))
-    #                 break
-    #
-    # print("externs: ", len(externs))
-    # for c in externs:
-    #     (AcX, AcY, Ax, Ay, Aw, Ah) = c
-    #     cv.circle(img, (AcX, AcY), 2, (255, 255, 255), -1)
-    #     cv.rectangle(img, (Ax, Ay), (Ax + Aw, Ay + Ah), (0, 0, 255), 2)
-    '''
-    cv.namedWindow("Segmented Image", cv.WINDOW_NORMAL)
-    cv.imshow("Segmented Image", img)
-    print("contours: ", len(sections))
-    '''
-    return sections
+    return img, sections
 
 
 def main(argv):
 
-    
     ##  Recebimento dos argumentos
     parser = argparse.ArgumentParser(description = 'Detecção de solda')
     parser.add_argument('--arquivo', action = 'store', dest = 'src', default = 'foto', required = False, help = 'Nome do arquivo de imagem ou "foto" para utilizar a camera')
     parser.add_argument('-filtro', type = int, action = 'store', dest = 'filtro', default = 1, required = False, help = 'Tipo se filtro a ser aplicado: 1- Sem Filtro; 2 - Median Blur; 3 - Gaussian Blur ')
-    parser.add_argument('-borda', type = int, action = 'store', dest = 'borda', default = 1, required = False, help = 'Tipo de detecção de borda a ser aplicado: 1- Corner Harris 2 - Hough Lines')
+    parser.add_argument('-borda', type = int, action = 'store', dest = 'borda', default = 1, required = False, help = 'Tipo de detecção de borda a ser aplicado: 1- Corner Harris; 2 - Hough Lines')
     
     arguments = parser.parse_args()
 
     ##  Verifica se carrega o arquivo ou tira uma foto
     if (arguments.src == 'foto'):
-        srcGrey, srcRGB = takepic() #   Chama função da camera
+        #srcGrey, srcRGB = takepic() #   Chama função da camera
+        srcRGB = takepic() #   Chama função da camera
+        outFile = "seg_saida.png"
     else:
-        srcGrey, srcRGB = loadImage(arguments.src) # Carrega Imagem
-    '''
-    cv.namedWindow("Original Grey", cv.WINDOW_NORMAL)
-    cv.imshow("Original Grey", srcGrey)
-    cv.namedWindow("Original RGB", cv.WINDOW_NORMAL)
-    cv.imshow("Original RGB", srcRGB)
-    '''
+        #srcGrey, srcRGB = loadImage(arguments.src) # Carrega Imagem
+        srcRGB = loadImage(arguments.src) # Carrega Imagem
+        outFile = "seg_" + arguments.src
+    
+
     
     ## Aplica o filtro na imagem, caso tenha sido escohido
-    if (arguments.filtro == 2) or (arguments.filtro == 3):
-        srcGrey = filter(srcGrey, arguments.filtro)
-        '''
-        cv.namedWindow("Filter", cv.WINDOW_NORMAL)
-        cv.imshow("Filter", srcGrey)
-        '''
+    #if (arguments.filtro == 2) or (arguments.filtro == 3):
+    #    srcGray = filter(srcGrey, arguments.filtro)
+
+    start = time.time()
 
     ##  Decção de bordas
     if (arguments.borda == 1):
-        srcRGB, srcGrey = CornerPespec(srcRGB)
+        srcRGB = CornerPespec(srcRGB)
     else:
         edges = edgesDetection(srcGrey)
-        '''
-        cv.namedWindow("Canny Output", cv.WINDOW_NORMAL)
-        cv.imshow("Canny Output", edges)
-        '''
+
         #   Detecta a maior borda
         border = cv.cvtColor(edges, cv.COLOR_GRAY2BGR)
         x1, y1, x2, y2 = borderPCB(edges)
         cv.line(border, (x1, y1), (x2, y2), (0, 0, 255), 1, cv.LINE_AA) #   Desenha linha na bordas
-        '''
-        cv.namedWindow("PCB border", cv.WINDOW_NORMAL)
-        cv.imshow("PCB border", border)
-        '''
+
         #   Alinhamento
         aliGrey = alignment(srcGrey, x1, y1, x2, y2)
         aliRGB = alignment(srcRGB, x1, y1, x2, y2)
-        '''
-        cv.namedWindow("Alignment Grey", cv.WINDOW_NORMAL)
-        cv.imshow("Alignment Grey", aliGrey)
-        cv.namedWindow("Alignment RGB", cv.WINDOW_NORMAL)
-        cv.imshow("Alignment RGB", aliRGB)
-        '''
+
         #   Corta região da placa
         cutGrey = aliGrey[y1:, x1:] 
         cutRGB = aliRGB[y1:, x1:]
         cutGrey = srcGrey
         cutRGB = srcRGB
-        '''
-        cv.namedWindow("Grey - cut and aligned", cv.WINDOW_NORMAL)
-        cv.imshow("Grey - cut and aligned", cutGrey)
-        cv.namedWindow("RGB - cut and aligned", cv.WINDOW_NORMAL)
-        cv.imshow("RGB - cut and aligned", cutRGB)
-        '''
         
+    end = time.time()
+    print("Corner")
+    print(end - start)
+    
     #   Normalização de cor
-    # print(cutRGB[:, :, 0].shape)
-    normRGB = colorN(srcRGB, 5)
-    '''
-    cv.namedWindow("Normalize - RGB", cv.WINDOW_NORMAL)
-    cv.imshow("Normalize - RGB", normRGB)
-    '''
+    #normRGB = colorN(srcRGB, srcGray)
+    print(srcRGB.shape)
+    normRGB = colorN(srcRGB)
+
+    print("Normal")
+    end = time.time()
+    print(end - start)
+
     # Thresholding
-    thrGrey = threshold(normRGB, srcGrey)
-    #thrGrey = threshold(srcRGB, srcGrey)
-    '''
-    cv.namedWindow("YIQ - Thresold", cv.WINDOW_NORMAL)
-    cv.imshow("YIQ - Thresold", thrGrey)
-    '''
-    segList = segment_01(thrGrey, normRGB)
-    cv.waitKey()
+    thrGray = threshold(normRGB)
+
+    print("Thresold")
+    end = time.time()
+    print(end - start)
+
+    img, segList = segment_01(thrGray, normRGB)
+    
+    end = time.time()
+    print(end - start)
+    
+    cv.imwrite(outFile, img)
+
     return 0
 
 
