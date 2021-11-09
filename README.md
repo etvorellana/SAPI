@@ -20,3 +20,35 @@ Rode os comandos abaixo para a instalação das dependencias listadas no arquivo
 ```sh
 pip install -r requirements.txt
 ```
+  
+  
+## Utilizando variáveis de ambiente
+
+O projeto utiliza variáveis de ambiente através do python-dotenv.
+
+### Adicionando variáveis ao arquivo ```.env```
+
+Pode-se atribuir qualquer valor a variavel no arquivo ```.env```, conforme no exemplo abaixo: 
+
+```
+DEFAULT_PATH = /home/pi/Pictures/
+```
+
+### Usando variáveis do ambiente
+
+Para utilizar as variáveis do ambiente inicializadas no arquivo ```.env```, importe o módulo ```os``` e as funções ```load_dotenv()``` e ```find_dotenv()``` do módulo ```dotenv```.  
+  
+Logo após, inicialize as variáveis de ambiente utilizando o comando abaixo:
+
+```
+import os
+from dotenv import load_dotenv, find_dotenv
+  
+load_dotenv(find_dotenv())
+```  
+  
+Por fim, resgate as variáveis utilizando o comando ```os.getenv()```.
+  
+```
+os.getenv("DEFAULT_PATH")
+```
