@@ -13,7 +13,7 @@ camera = PiCamera()
 
 def capture():
     timestamp = datetime.now().isoformat()
-    camera.capture('/home/pi/Pictures/%s.png' % timestamp)
+    # camera.capture('/home/pi/Pictures/%s.png' % timestamp)
     camera.capture('%s%s.png' % (os.getenv("DEFAULT_PATH"), timestamp))
 
 clikButton.when_pressed = capture
