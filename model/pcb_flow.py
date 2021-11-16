@@ -10,6 +10,7 @@ class PCBFlow():
         self.filtro = filtro
     
     def print_timers(self):
+        print("------------------------")
         for tempo in self.tempos:
             print("Método: ", tempo.method)
             print("Start: ", tempo.start)

@@ -4,7 +4,6 @@ import time
 # import picamera
 
 def loadImage(fileName):
-    print(fileName)
     srcRGB = cv.imread(cv.samples.findFile(fileName)) # Carrega a imagem colorida
     return srcRGB
 

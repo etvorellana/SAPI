@@ -52,3 +52,15 @@ Por fim, resgate as variáveis utilizando o comando ```os.getenv()```.
 ```
 os.getenv("DEFAULT_PATH")
 ```
+
+## Executando o código
+
+Para executar o projeto, primeiramente será necessário acessar um ambiente virtual já criado:
+```
+source rpi-cam-prototype-env/bin/activate
+```
+
+Após isso, pode-se executar o projeto utilizando o comando:
+```
+python main.py --arquivo './Flow/Base da dados/Pi camera/PCB_001.png'
+```

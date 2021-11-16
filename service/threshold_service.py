@@ -32,7 +32,7 @@ class ThresholdService():
             Y_max = soma/quant
             Y_med = (Y_max + Y_min) / 2.0
 
-        print(cont)
+        # print(cont)
         thrGray = np.where(a < Y_med, 0, 255)
         #thrGray = cv.normalize(thrGray, None, 0, 255, cv.NORM_MINMAX, dtype=cv.CV_8U)
         thrGray = np.array(thrGray, dtype=np.uint8)
