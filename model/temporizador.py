@@ -1,16 +1,16 @@
-import time
+from time import perf_counter
 
 class Temporizador():
-    def __init__(self, method) -> None:
+    def __init__(self, method : str) -> None:
         self.method = method
         self.start = 0
         self.end = 0
+        self.duracao = 0
 
-    def start_timer(self, method_str):
-        self.method = method_str
-        self.start = time.perf_count()
+    def start_timer(self):
+        self.start = perf_counter()
 
-    def stop_timer(self, method_str):
-        self.end = time.perf_count()
-        duracao = self.end - self.start
-        return duracao
+    def stop_timer(self):
+        self.end = perf_counter()
+        self.duracao = self.end - self.start
+        

@@ -33,7 +33,6 @@ class DeteccaoBordasService:
 
     ## Detecção de cantos e correção de pespectiva com corner Harris
     def CornerPespec(self, srcRGB):
-        
         h, w, c = srcRGB.shape
         kernel = np.ones((5,5),np.float32)/25
 
