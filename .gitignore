@@ -1,3 +1,15 @@
 # Nome da pasta do ambiente virtual
 rpi-cam-prototype-env-old
 rpi-cam-prototype-env
+
+# Script de execução
+Flow/run_test.sh
+
+model/__pycache__
+service/__pycache__
+util/__pycache__
+view/__pycache__
+
+# Arquivos teste de saída
+seg_test.png
+Flow/seg_test.png
