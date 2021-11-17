@@ -53,6 +53,13 @@ Por fim, resgate as variáveis utilizando o comando ```os.getenv()```.
 os.getenv("DEFAULT_PATH")
 ```
 
+## Criando ambiente virtual
+
+Para criar o ambiente virtual, basta executar o script ```venv``` através do python. O código abaixo mostra como criar um ambiente virtual chamado ```rpi-cam-prototype-env```:
+```
+python -m venv rpi-cam-prototype-env
+```
+
 ## Executando o código
 
 Para executar o projeto, primeiramente será necessário acessar um ambiente virtual já criado:
