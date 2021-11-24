@@ -2,11 +2,11 @@ Diretório para os arquivos do Flow.
 
 # ==================================
 # Criando o ambiente virtual
-# py -m venv rpi-cam-prototype-env              [Depecrated - Comando utilizado no Powershell do windows]
+# py -m venv rpi-cam-prototype-env              [Descontinuado - Comando utilizado no Powershell do windows]
 # python -m venv rpi-cam-prototype-env
 
 # Usando ambiente virtual
-# .\rpi-cam-prototype-env\Scripts\activate      [Depecrated - Comando utilizado no Powershell do windows]
+# .\rpi-cam-prototype-env\Scripts\activate      [Descontinuado - Comando utilizado no Powershell do windows]
 # source rpi-cam-prototype-env/bin/activate
 
 # Sair do ambiente virtual

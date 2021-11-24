@@ -377,6 +377,7 @@ def main(argv):
     parser.add_argument('-borda', type = int, action = 'store', dest = 'borda', default = 1, required = False, help = 'Tipo de detecção de borda a ser aplicado: 1- Corner Harris; 2 - Hough Lines')
     
     arguments = parser.parse_args()
+    print("Arguments: ", arguments)
 
     ##  Verifica se carrega o arquivo ou tira uma foto
     if (arguments.src == 'foto'):
@@ -386,7 +387,8 @@ def main(argv):
     else:
         #srcGrey, srcRGB = loadImage(arguments.src) # Carrega Imagem
         srcRGB = loadImage(arguments.src) # Carrega Imagem
-        outFile = "seg_" + arguments.src
+        # outFile = "seg_" + arguments.src
+        outFile = "seg_test.png"
     
 
     
