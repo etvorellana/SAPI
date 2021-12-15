@@ -39,6 +39,7 @@ class SegmentacaoService():
         
         h1, w1 = im_out.shape
 
+        #285 e 130 são as dimensões (Largura e Altura) da placa (em mm)
         w_soldaP = (1.65*w1)/285
         w_soldaG = (3*w1)/285
 

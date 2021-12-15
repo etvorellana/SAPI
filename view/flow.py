@@ -5,11 +5,13 @@ from service.deteccao_bordas_service import DeteccaoBordasService
 from service.normalizacao_service import NormalizacaoService
 from service.threshold_service import ThresholdService
 from service.segmentacao_service import SegmentacaoService
+from service.DCT_service import DCTService
 
 deteccaoBordasService : DeteccaoBordasService = DeteccaoBordasService()
 normalizacaoService : NormalizacaoService = NormalizacaoService()
 thresholdService : ThresholdService = ThresholdService()
 segmentacaoService : SegmentacaoService = SegmentacaoService()
+dctService : DCTService = DCTService()
 
 def executar_flow(pcb_flow : PCBFlow):
     # Detecção de bordas
@@ -24,6 +26,7 @@ def executar_flow(pcb_flow : PCBFlow):
     pcb_flow.start_timer("Normalização")
 
     pcb_flow.img_norm = normalizacaoService.tratar(pcb_flow)
+    #pcb_flow.img_norm = DCTService.tratar(pcb_flow)
 
     pcb_flow.stop_timer("Normalização")
 
