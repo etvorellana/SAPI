@@ -69,5 +69,12 @@ source rpi-cam-prototype-env/bin/activate
 
 Após isso, pode-se executar o projeto utilizando o comando:
 ```
-python main.py --arquivo './Flow/Base da dados/Pi camera/PCB_001.png'
+python app-backend/main.py --arquivo './app-backend/Flow/Base da dados/Pi camera/PCB_001.png'
 ```
+
+Para executar o servidor web do flask, execute o seguinte comando:
+```
+flask run
+```
+
+O servidor pode ser acessado pelo endereço ```http://localhost:5000/```
