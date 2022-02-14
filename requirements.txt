@@ -1,5 +1,7 @@
-numpy
+numpy==1.22.2
 opencv-python
-scikit-image
-python-dotenv
+scikit-image==0.19.1
+python-dotenv==0.19.2
+Flask==2.0.2
+flask_sock==0.4.0
 # picamera
