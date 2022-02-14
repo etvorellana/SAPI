@@ -1,5 +1,5 @@
 numpy==1.22.2
-opencv-python
+opencv-python==4.5.5.62
 scikit-image==0.19.1
 python-dotenv==0.19.2
 Flask==2.0.2
