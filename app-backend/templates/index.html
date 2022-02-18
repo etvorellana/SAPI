@@ -11,8 +11,9 @@
     <br>
     <button id="start-button" type="button">Start!</button>
     <script>
+        page = document.getElementById('log').innerHTML
         const log = (text, color) => {
-            document.getElementById('log').innerHTML += `<span style="color: ${color}">${text}</span><br>`;
+            document.getElementById('log').innerHTML = page + `<span style="color: ${color}">${text}</span><br>`;
         };
 
         document.getElementById('start-button').onclick = ev => {

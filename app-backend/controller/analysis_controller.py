@@ -1,28 +1,33 @@
-import json, time
+import json
 from flask import Blueprint
 from flask_sock import Sock, ConnectionClosed
-from gpiozero import Button
+from service.analysis_service import AnalysisService
 
 analysis_blueprint = Blueprint('analysis_blueprint', __name__)
 sock = Sock(analysis_blueprint)
-piButton = Button(2)
+analysis_service = AnalysisService()
 
 @sock.route('')
 def analysis(sock):
     try:
         print(f'Starting analysis websocket route...')
-        counter = 1
-        piButton.when_released = button_released
+        analysis_service.started = True
+        analysis_service.state_service.set_state(1)
+
         while True:
-            message = json.dumps({"message": f'hello {counter}'})
-            sock.send(message)
-            counter += 1
-            print(f'Hello sent. Waiting until next message...')
-            time.sleep(2)
+            result = analysis_service.orchestrate_state()
+            # state 1 - start of process
+            # state 2 - watching camera
+            # state 3 - processing image
+            # state 4 - showing image and waiting for restart
+            if result['state'] == 1 or result['state'] == 3:
+                message_json = json.dumps(result)
+                print(f"Sending message for state: {result['state']}")
+                sock.send(message_json)
+
     except ConnectionClosed as ex:
         print(f"Connection terminated by the client. {ex}")
     except Exception as ex:
         print(f"Unexpected error occurred. {ex}")
-
-def button_released():
-    print(f'Button pressed!')
+    
+    analysis_service.started = False
