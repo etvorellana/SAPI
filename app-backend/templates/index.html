@@ -11,7 +11,7 @@
     <br>
     <button id="start-button" type="button">Start!</button>
     <h2>Video feed</h2>
-    <img id="video-feed" src="{{ url_for('camera_blueprint.camera_feed') }}" style="display: none;">
+    <img id="video-feed" src="{{ url_for('camera_blueprint.camera_feed') }}" >
     <script>
         page = document.getElementById('log').innerHTML
         const log = (text, color) => {
@@ -24,12 +24,6 @@
             const socket = new WebSocket('ws://' + location.host + '/analysis');
             socket.addEventListener('message', ev => {
                 log('<<< ' + ev.data, 'green');
-                const receivedMessage = JSON.parse(ev.data)
-                if (receivedMessage.state != 1) {
-                    document.getElementById('video-feed').style.display = "none"
-                } else {
-                    document.getElementById('video-feed').style.display = ""
-                }
             });
         };
     </script>

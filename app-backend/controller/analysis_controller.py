@@ -1,4 +1,5 @@
 import json
+import time
 from flask import Blueprint
 from flask_sock import Sock, ConnectionClosed
 from service.analysis_service import AnalysisService
@@ -24,6 +25,7 @@ def analysis(sock):
                 message_json = json.dumps(result)
                 print(f"Sending message for state: {result['state']}")
                 sock.send(message_json)
+            time.sleep(0.1)
 
     except ConnectionClosed as ex:
         print(f"Connection terminated by the client. {ex}")
