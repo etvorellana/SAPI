@@ -34,7 +34,7 @@ class AnalysisService:
     def orchestrate_analysis(self, image):
         # orchestrate analysis
         print(f"Starting image analysis...")
-        file_image = cv.imread(cv.samples.findFile("./app-backend/Flow/Base da dados/Pi camera/PCB_001.png"))
+        file_image = cv.imread(cv.samples.findFile("./app-backend/Flow/Testes Placas MCM_v1/Foto08_seg_p.png"))
         base64bytes = base64.b64encode(file_image)
         image_string = base64bytes.decode("ascii")
         resultImage = image_string
