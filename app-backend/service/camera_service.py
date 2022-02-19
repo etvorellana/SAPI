@@ -1,5 +1,6 @@
 import os
 import cv2 as cv
+import imutils
 
 class CameraService():
     def __init__(self):
@@ -7,8 +8,6 @@ class CameraService():
             self.camera = cv.VideoCapture(0)
         else:
             self.camera = cv.VideoCapture("./app-backend/media/video_sample.mp4")
-        self.camera.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
-        # self.camera.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
         self.camera.set(cv.CAP_PROP_BUFFERSIZE, 1)
 
     def __del__(self):
@@ -21,6 +20,8 @@ class CameraService():
             if not success:
                 self.camera.set(cv.CAP_PROP_POS_FRAMES, 0)
                 continue
+
+            frame = imutils.resize(frame, width=1024)
 
             flag, encoded_frame = cv.imencode('.jpg', frame)
 
