@@ -1,5 +1,8 @@
+import base64
+from io import BytesIO
 import numpy as np
 import cv2 as cv
+from PIL import Image
 import time
 # import picamera
 
@@ -30,3 +33,11 @@ def filter(srcGray, opt):
         srcGray = cv.GaussianBlur(srcGray, (5, 5), 0) # Aplica filtro Gaussian Blur
 
     return srcGray
+
+def from_np_array_to_base64(image, format = "png"):
+    pil_img = Image.fromarray(image)
+    buff = BytesIO()
+    pil_img.save(buff, format)
+    encoded_image = base64.b64encode(buff.getvalue())
+
+    return encoded_image.decode()

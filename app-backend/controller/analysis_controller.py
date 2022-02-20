@@ -19,9 +19,10 @@ def analysis(sock):
             result = analysis_service.orchestrate_state()
             # state 1 - start of process
             # state 2 - watching camera
-            # state 3 - processing image
-            # state 4 - showing image and waiting for restart
-            if result['state'] == 1 or result['state'] == 3:
+            # state 3 - processing image start
+            # state 4 - processing image finished
+            # state 5 - showing image and waiting for restart
+            if result['state'] == 1 or result['state'] == 3 or result['state'] == 4: # only these states are sent to client
                 message_json = json.dumps(result)
                 print(f"Sending message for state: {result['state']}")
                 sock.send(message_json)

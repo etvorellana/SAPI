@@ -8,5 +8,5 @@ camera_blueprint = Blueprint('camera_blueprint', __name__)
 def camera_feed():
     camera_service = CameraService()
     time.sleep(2)
-    frame = camera_service.get_frame()
+    frame = camera_service.get_feed()
     return Response(frame, mimetype = "multipart/x-mixed-replace; boundary=frame")

@@ -10,8 +10,15 @@
     <div id="log"></div>
     <br>
     <button id="start-button" type="button">Start!</button>
-    <h2>Video feed</h2>
-    <img id="video-feed" src="{{ url_for('camera_blueprint.camera_feed') }}" >
+    <button id="step-button" type="button" style="display: none;">Step</button>
+    <div id="video-div" style="display: none;">
+        <h2>Video feed</h2>
+        <img id="video-feed" src="{{ url_for('camera_blueprint.camera_feed') }}" >
+    </div>
+    <div id="image-div" style="display: none;">
+        <h2>Image</h2>
+        <img id="image" alt="Result image" />
+    </div>
     <script>
         page = document.getElementById('log').innerHTML
         const log = (text, color) => {
@@ -21,11 +28,32 @@
         document.getElementById('start-button').onclick = ev => {
             ev.preventDefault();
             document.getElementById('start-button').style.display = "none"
+            document.getElementById('step-button').style.display = ""
             const socket = new WebSocket('ws://' + location.host + '/analysis');
             socket.addEventListener('message', ev => {
-                log('<<< ' + ev.data, 'green');
+                const message = JSON.parse(ev.data)
+                log('<<< State: ' + message.state, 'green');
+                if (message.state == 1) {
+                    document.getElementById('video-div').style.display = ""
+                    document.getElementById('image-div').style.display = "none"
+                } else {
+                    document.getElementById('video-div').style.display = "none"
+                    document.getElementById('image-div').style.display = ""
+                }
+                const obj = JSON.parse(ev.data)
+                if (obj.image) {
+                    document.getElementById('image').src = "data:image/png;base64, " + obj.image
+                } else {
+                    document.getElementById('image').src = ""
+                }
             });
         };
+
+        document.getElementById('step-button').onclick = ev => {
+            const xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("POST", 'http://' + location.host + '/button/press', false); // false for synchronous request
+            xmlHttp.send();
+        }
     </script>
 </body>
 
