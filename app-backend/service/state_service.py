@@ -3,7 +3,7 @@ class StateService:
         self.state = 1
 
     def change_state(self):
-        if self.state >= 4:
+        if self.state >= 5:
             self.state = 1
         else:
             self.state += 1
