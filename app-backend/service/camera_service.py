@@ -1,4 +1,6 @@
 import os
+from time import sleep
+import time
 import cv2 as cv
 import imutils
 import numpy
@@ -33,6 +35,7 @@ class CameraService():
             output_frame = bytearray(encoded_frame)
 
             yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + output_frame + b'\r\n')
+            time.sleep(0.06)
 
     def get_frame(self):
         if os.environ.get("FLASK_ENV") == "development":
