@@ -4,6 +4,7 @@ import time
 from flask import Blueprint
 from flask_sock import Sock, ConnectionClosed
 from service.analysis_service import AnalysisService
+from service.camera_service import CameraService
 
 analysis_blueprint = Blueprint('analysis_blueprint', __name__)
 sock = Sock(analysis_blueprint)
@@ -51,3 +52,5 @@ def analysis(sock):
     connection_count -= 1
     if connection_count == 0:
         analysis_service.started = False
+
+    sock.close()
