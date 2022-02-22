@@ -45,4 +45,4 @@ def executar_flow(pcb_flow : PCBFlow):
     
     
     pcb_flow.print_timers()
-    return img
+    return img, segList
