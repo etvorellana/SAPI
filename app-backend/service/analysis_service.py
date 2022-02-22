@@ -68,4 +68,5 @@ class AnalysisService:
 
     def button_released(self):
         print(f'Button pressed!')
-        self.button_pressed = True
+        if self.started:
+            self.button_pressed = True
