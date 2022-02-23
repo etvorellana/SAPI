@@ -1,10 +1,14 @@
 import json
 import threading
 import time
-from flask import Blueprint
+import cv2 as cv
+import numpy
+import base64
+import io
+from PIL import Image
+from flask import Blueprint, jsonify, request
 from flask_sock import Sock, ConnectionClosed
 from service.analysis_service import AnalysisService
-from service.camera_service import CameraService
 
 analysis_blueprint = Blueprint('analysis_blueprint', __name__)
 sock = Sock(analysis_blueprint)
@@ -54,3 +58,15 @@ def analysis(sock):
         analysis_service.started = False
 
     sock.close()
+
+@analysis_blueprint.route('/simulation',  methods = ['POST'])
+def simulation():
+    img_data = base64.b64decode(request.json["image"])
+    pil_img = Image.open(io.BytesIO(img_data))
+    img = cv.cvtColor(numpy.array(pil_img), cv.COLOR_BGR2RGB)
+
+    with analysis_service.lock:
+        analysis_service.frame_to_process = img
+        analysis_service.state_service.state = 4
+
+    return jsonify({"success": True})
