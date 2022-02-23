@@ -1,5 +1,4 @@
 import os
-from time import sleep
 import time
 import cv2 as cv
 import imutils
@@ -53,4 +52,4 @@ class CameraService():
             return None
 
         bytes_as_np_array = numpy.frombuffer(encoded_frame, dtype=numpy.uint8)
-        return cv.imdecode(bytes_as_np_array)
+        return cv.imdecode(bytes_as_np_array, cv.IMREAD_UNCHANGED)
