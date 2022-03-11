@@ -9,7 +9,7 @@ class CameraService():
         if os.environ.get("FLASK_ENV") == "production":
             self.camera = cv.VideoCapture(0)
         else:
-            self.camera = cv.VideoCapture("./app-backend/media/video_sample.mp4")
+            self.camera = cv.VideoCapture("./media/video_sample.mp4")
         self.camera.set(cv.CAP_PROP_BUFFERSIZE, 1)
 
     def __del__(self):
@@ -38,7 +38,7 @@ class CameraService():
 
     def get_frame(self):
         if os.environ.get("FLASK_ENV") == "development":
-            image = cv.imread(cv.samples.findFile("./app-backend/Flow/Base da dados/Pi camera/PCB_009.png"))
+            image = cv.imread(cv.samples.findFile("./Flow/Base da dados/Pi camera/PCB_009.png"))
             return image
 
         success, frame = self.camera.read()
