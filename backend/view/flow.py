@@ -1,15 +1,15 @@
-import time
 from model.pcb_flow import PCBFlow
-from model.temporizador import Temporizador
 from service.deteccao_bordas_service import DeteccaoBordasService
 from service.normalizacao_service import NormalizacaoService
 from service.threshold_service import ThresholdService
 from service.segmentacao_service import SegmentacaoService
+from service.classificacao_service import ClassificacaoService
 
 deteccaoBordasService : DeteccaoBordasService = DeteccaoBordasService()
 normalizacaoService : NormalizacaoService = NormalizacaoService()
 thresholdService : ThresholdService = ThresholdService()
 segmentacaoService : SegmentacaoService = SegmentacaoService()
+classificacaoService : ClassificacaoService = ClassificacaoService()
 
 def executar_flow(pcb_flow : PCBFlow):
     # Detecção de bordas
@@ -42,6 +42,13 @@ def executar_flow(pcb_flow : PCBFlow):
     img, segList = segmentacaoService.tratar(pcb_flow)
 
     pcb_flow.stop_timer("Segmentação")
+
+    # Classificacao
+    pcb_flow.start_timer("Classificação")
+
+    classficacao = classificacaoService.classificar(pcb_flow)
+
+    pcb_flow.stop_timer("Classificação")
     
     
     pcb_flow.print_timers()
