@@ -24,9 +24,9 @@ export class UploadService {
     return new Promise<string[] | null>((resolve, reject) => {
       const input = this.createInput(accept)
       this.renderer.appendChild(this.document.body, input)
-      input.onchange = () => {
+      input.onchange = async () => {
         try {
-          resolve(this.handleFileChange(input, multiple))
+          resolve(await this.handleFileChange(input, multiple))
         } catch (error) {
           reject(error)
         } finally {
@@ -38,18 +38,18 @@ export class UploadService {
   }
 
   private async handleFileChange(input: HTMLInputElement, multiple: boolean): Promise<string[] | null> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (input.files && input.files.length > 0) {
         let files: File[] = Array.from(input.files)
         const filesBase64: string[] = []
-        files.forEach(async file => {
+        for (let file of files) {
           try {
             const fileString = await this.readFileAsync(file)
             filesBase64.push(fileString)
           } catch (error) {
             reject(error)
           }
-        })
+        }
         resolve(filesBase64)
       }
       resolve(null)
