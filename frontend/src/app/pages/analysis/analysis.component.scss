@@ -1,0 +1,43 @@
+@import "src/assets/css/theme.scss";
+
+:host {
+    flex-grow: 1;
+    display: flex;
+
+    #analysis-results {
+        background-color: white;
+        color: var(--text-black);
+        #results-header {
+            font-weight: 600;
+        }
+        .result-value {
+            font-size: 2em;
+            font-weight: 600;
+            &.success {
+                color: var(--success);
+            }
+            &.warning {
+                color: var(--warning);
+            }
+            &.danger {
+                color: var(--danger);
+            }
+        }
+    }
+
+    #camera-preview img, #processed-image img {
+        max-width: 100%;
+    }
+
+    #processing-message {
+        position: absolute;
+        top: 50%;
+        background-color: var(--bg);
+        padding: 1em;
+        border-radius: 5px;
+    }
+
+    #analysis-results, #results-header, .result-item {
+        border: 1px solid var(--border);
+    }
+}

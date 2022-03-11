@@ -1,32 +1,33 @@
 # SAPI
 
 
-
-## Atualizando dependências
+## Backend
+### Atualizando dependências
 
 A aplicação utiliza o pip-tools para gerenciamento das dependencias
 
-### instalando pip-tools
+#### instalando pip-tools
 
 ```sh
 pip install --upgrade pip  # pip-tools precisa de pip>=6.
 pip install pip-tools
 ```
 
-### instalando dependencias da aplicação
+#### instalando dependencias da aplicação
 
 Rode os comandos abaixo para a instalação das dependencias listadas no arquivo **requirements.txt**
 
 ```sh
+cd backend
 pip install -r requirements.txt
 ```
   
   
-## Utilizando variáveis de ambiente
+### Utilizando variáveis de ambiente
 
 O projeto utiliza variáveis de ambiente através do python-dotenv.
 
-### Adicionando variáveis ao arquivo ```.env```
+#### Adicionando variáveis ao arquivo ```.env```
 
 Pode-se atribuir qualquer valor a variavel no arquivo ```.env```, conforme no exemplo abaixo: 
 
@@ -34,7 +35,7 @@ Pode-se atribuir qualquer valor a variavel no arquivo ```.env```, conforme no ex
 DEFAULT_PATH = /home/pi/Pictures/
 ```
 
-### Usando variáveis do ambiente
+#### Usando variáveis do ambiente
 
 Para utilizar as variáveis do ambiente inicializadas no arquivo ```.env```, importe o módulo ```os``` e as funções ```load_dotenv()``` e ```find_dotenv()``` do módulo ```dotenv```.  
   
@@ -53,14 +54,14 @@ Por fim, resgate as variáveis utilizando o comando ```os.getenv()```.
 os.getenv("DEFAULT_PATH")
 ```
 
-## Criando ambiente virtual
+### Criando ambiente virtual
 
 Para criar o ambiente virtual, basta executar o script ```venv``` através do python. O código abaixo mostra como criar um ambiente virtual chamado ```rpi-cam-prototype-env```:
 ```
 python -m venv rpi-cam-prototype-env
 ```
 
-## Executando o código
+### Executando o código
 
 Para executar o projeto, primeiramente será necessário acessar um ambiente virtual já criado:
 ```
@@ -69,7 +70,7 @@ source rpi-cam-prototype-env/bin/activate
 
 Após isso, pode-se executar o projeto utilizando o comando:
 ```
-python app-backend/main.py --arquivo './app-backend/Flow/Base da dados/Pi camera/PCB_001.png'
+python backend/main.py --arquivo './backend/Flow/Base da dados/Pi camera/PCB_001.png'
 ```
 
 Para executar o servidor web do flask, execute o seguinte comando:
@@ -78,3 +79,14 @@ flask run
 ```
 
 O servidor pode ser acessado pelo endereço ```http://localhost:5000/```
+
+## Frontend
+
+### Executando o código
+
+Para desenvolvimento, rode:
+```sh
+cd frontend
+ng serve
+```
+A aplicação estará disponível em `http://localhost:4200/`
