@@ -1,0 +1,47 @@
+<div
+  id="topbar-wrapper"
+  [ngClass]="{ 'advanced-mode': _advancedMode }"
+  class="d-flex align-items-center justify-content-between"
+  [@toggleAdvanced]="_advancedMode ? 'advanced' : 'compact'"
+>
+  <div id="topbar-info" class="d-flex align-items-center">
+    <img
+      id="topbar-logo"
+      src="assets/image/sapi-logo.svg"
+      alt="SAPI project logo"
+    />
+    <span id="topbar-title">SAPI</span>
+  </div>
+  <div id="topbar-actions" class="d-flex">
+    <ng-container *ngFor="let btn of buttons">
+      <app-topbar-button
+        class="topbar-button"
+        [attr.advanced]="_advancedMode"
+        *ngIf="_advancedMode || !btn.advancedOnly"
+        (click)="btn.action()"
+        [icon]="btn.icon"
+        [text]="btn.text"
+      ></app-topbar-button>
+    </ng-container>
+
+    <div ngbDropdown id="steps-dropdown" class="d-flex">
+      <app-topbar-button
+        [attr.advanced]="_advancedMode"
+        id="steps-dropdown-toggle"
+        *ngIf="_advancedMode"
+        icon="steps"
+        text="Etapas"
+        ngbDropdownToggle
+      ></app-topbar-button>
+
+      <app-steps-dropdown
+        ngbDropdownMenu
+        class="p-0"
+        aria-labelledby="steps-dropdown-toggle"
+      ></app-steps-dropdown>
+    </div>
+  </div>
+  <button id="configs-action" class="btn">
+    <img src="assets/image/icon/cog.svg" alt="cog icon" />
+  </button>
+</div>

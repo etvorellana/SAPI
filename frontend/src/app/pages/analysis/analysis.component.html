@@ -1,0 +1,54 @@
+<div class="container d-flex flex-column py-4 flex-grow-1">
+  <div id="analysis-results" class="d-flex flex-column align-self-stretch">
+    <div id="results-header" class="d-flex justify-content-center">
+      <span>Classificação</span>
+    </div>
+    <div id="results-container" class="d-flex align-items-strech">
+      <div
+        *ngFor="let res of results; let i = index"
+        class="result-item flex-fill d-flex flex-column align-items-center justify-content-evenly"
+      >
+        <span
+          id="result-{{ i }}"
+          class="result-value"
+          [ngClass]="res.value > 0 ? res.color : ''"
+          [ngStyle]="{ 'font-style': '' }"
+          >{{ res.value }}</span
+        >
+        <label class="result-label" for="result-{{ i }}">{{ res.label }}</label>
+      </div>
+    </div>
+  </div>
+  <ng-container *ngIf="lastMessage">
+    <div
+      *ngIf="lastMessage.state == 1 || lastMessage.state == 2"
+      id="camera-preview"
+      class="d-flex flex-grow-1 justify-content-center mt-4"
+    >
+      <img [src]="cameraFeed" class="h-100" alt="camera live view" />
+    </div>
+    <div
+      *ngIf="
+        lastMessage.state == 3 ||
+        lastMessage.state == 4 ||
+        lastMessage.state == 5
+      "
+      id="processed-image"
+      class="d-flex flex-grow-1 justify-content-center mt-4"
+    >
+      <div
+        id="processing-message"
+        class="d-flex flex-column justify-content-center align-items-center"
+        *ngIf="lastMessage.state == 3"
+      >
+        <app-spinner></app-spinner>
+        <span>Processando</span>
+      </div>
+      <img
+        src="data:image/png;base64,{{ lastMessage?.image }}"
+        class="h-100"
+        alt="processed image view"
+      />
+    </div>
+  </ng-container>
+</div>

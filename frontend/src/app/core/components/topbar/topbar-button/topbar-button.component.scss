@@ -1,0 +1,32 @@
+@import "src/assets/css/theme.scss";
+
+:host {
+    display: flex;
+    .topbar-action-btn {
+        display: flex;
+        align-items: center;
+        background-color: var(--primary);
+        color: var(--text-white);
+        border-radius: 0;
+        border: 1px solid var(--primary-contrast-dark);
+        .topbar-btn-icon {
+            width: 1.5em;
+        }
+        .topbar-btn-label {
+            margin-left: 0.7em;
+            font-size: 0.8em;
+        }
+    }
+    &[advanced="true"] {
+        .topbar-action-btn {
+            @include for-tablet-landscape-up {
+                width: 150px;
+            }
+            flex-direction: column;
+            justify-content: space-around;
+            .topbar-btn-label {
+                margin-left: 0;
+            }
+        }
+    }
+}

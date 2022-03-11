@@ -1,0 +1,38 @@
+@import "src/assets/css/theme.scss";
+
+#topbar-wrapper {
+    padding: 0 1rem;
+    background-color: var(--primary);
+    color: var(--text-white);
+    font-size: 0.6rem;
+    #topbar-logo {
+        height: 25px;
+        margin-right: 0.75em;
+    }
+    #topbar-title {
+        font-size: 2em;
+        font-weight: 900;
+    }
+    #topbar-actions {
+        align-self: stretch;
+        background-color: var(--primary-contrast-dark);
+        padding: 0 1px;
+        app-topbar-button {
+            &::after {
+                display: none;
+            }
+        }
+    }
+    #configs-action {
+        font-size: 1em;
+        img {
+            width: 2.5em;
+        }
+    }
+    &.advanced-mode {
+        font-size: 1rem;
+        #topbar-logo {
+            height: 50px;
+        }
+    }
+}
