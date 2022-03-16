@@ -1,75 +1,97 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
-import { Message } from 'src/app/core/models/message';
+import { Message, SoldersClassification } from 'src/app/core/models/message';
 import { AnalysisService } from 'src/app/core/services/analysis.service';
 import { environment } from 'src/environments/environment';
 
-type AnalysisResult = { label: string, key: string, value: number, color: string };
+type AnalysisResult = { label: string, key: keyof SoldersClassification, value?: number, color: string };
 
 @Component({
   selector: 'app-analysis',
   templateUrl: './analysis.component.html',
   styleUrls: ['./analysis.component.scss']
 })
-export class AnalysisComponent implements OnInit, OnDestroy{
-  
+export class AnalysisComponent implements OnInit, OnDestroy {
+
   destroyed$ = new Subject<void>();
-  
+
   cameraFeed: string = ''
   lastMessage?: Message
-  
+
   results: AnalysisResult[] = [
     {
       label: 'Ponte',
-      key: 'bridge',
-      value: 1,
-      color: 'danger'
+      key: 'Ponte',
+      value: undefined,
+      color: 'crimson'
     },
     {
       label: 'Sem solda',
-      key: 'missing',
-      value: 0,
-      color: 'danger'
+      key: 'Ausente',
+      value: undefined,
+      color: 'violet'
     },
     {
       label: 'Pouca solda',
-      key: 'too-little',
-      value: 1,
-      color: 'warning'
+      key: 'Pouca',
+      value: undefined,
+      color: 'blue'
     },
     {
       label: 'Em excesso',
-      key: 'too-much',
-      value: 1,
-      color: 'warning'
+      key: 'Excesso',
+      value: undefined,
+      color: 'yellow'
     },
     {
       label: 'Boa',
-      key: 'good',
-      value: 1,
-      color: 'success'
+      key: 'Boa',
+      value: undefined,
+      color: 'green'
     }
   ]
-
-  // States
-  // 1 - start of process
-  // 2 - watching camera
-  // 3 - processing image start
-  // 4 - processing image finished
-  // 5 - showing image and waiting for restart
 
   constructor(private analysisService: AnalysisService) { }
 
   ngOnInit(): void {
     this.cameraFeed = `${environment.baseURL}/camera/feed`
     this.analysisService.listen((err) => { console.log('trying again') })
-    .pipe(takeUntil(this.destroyed$)).subscribe((message) => {
-      this.lastMessage = message
-    });
+      .pipe(takeUntil(this.destroyed$)).subscribe((message) => {
+        this.handleReceivedMessage(message)
+      });
+  }
+
+  handleReceivedMessage(message: Message) {
+    this.lastMessage = message
+    // States
+    switch (message.state) {
+      case 1:
+        // start of process
+        break
+      case 2:
+        // watching camera
+        break
+      case 3:
+        // processing image start
+        break
+      case 4:
+      // processing image finished
+      case 5:
+        // showing image and waiting for restart
+        this.updateClassification(message.solders_classification.classificacao)
+        break
+      default:
+        throw new Error('Unknown state')
+    }
   }
 
   ngOnDestroy() {
     this.destroyed$.next();
   }
 
+  updateClassification(classification: SoldersClassification) {
+    this.results.forEach(result => {
+      result.value = classification[result.key]
+    })
+  }
 }

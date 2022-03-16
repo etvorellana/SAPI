@@ -13,15 +13,6 @@
         .result-value {
             font-size: 2em;
             font-weight: 600;
-            &.success {
-                color: var(--success);
-            }
-            &.warning {
-                color: var(--warning);
-            }
-            &.danger {
-                color: var(--danger);
-            }
         }
     }
 

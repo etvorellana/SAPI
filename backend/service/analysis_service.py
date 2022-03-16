@@ -19,6 +19,7 @@ class AnalysisService:
         self.frame_to_process = None
         self.image = None
         self.result = None
+        self.classification = None
         self.lock = threading.Lock()
 
     def start(self):
@@ -53,9 +54,10 @@ class AnalysisService:
                 image_width = int(os.environ.get("DEFAULT_IMAGE_WIDTH"))
                 self.image = imutils.resize(result_image, width=image_width)
                 self.image = from_np_array_to_base64(self.image)
+                self.classification = solders_classification
                 self.state_service.change_state()
 
-            result = {"state": state, "solders_classification": solders_classification, "image": self.image}
+            result = {"state": state, "solders_classification": self.classification, "image": self.image}
             return result
 
     def orchestrate_analysis(self, image):
