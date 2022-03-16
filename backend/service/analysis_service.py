@@ -25,12 +25,12 @@ class AnalysisService:
         while True:
             if self.started:
                 self.result = self.orchestrate_state()
-            time.sleep(0.1)
+            time.sleep(0.10001)
 
     def orchestrate_state(self):
         with self.lock:
             state = self.state_service.state
-            solders_state = None
+            solders_classification = None
 
             if self.button_pressed:
                 self.state_service.change_state()
@@ -49,22 +49,21 @@ class AnalysisService:
                 if self.frame_to_process is None:
                     print("No frame set for analysis!")
                     raise RuntimeError("Unable to acquire frame for analysis.")
-                result_image, solders_state = self.orchestrate_analysis(self.frame_to_process)
+                result_image, solders_classification = self.orchestrate_analysis(self.frame_to_process)
                 image_width = int(os.environ.get("DEFAULT_IMAGE_WIDTH"))
                 self.image = imutils.resize(result_image, width=image_width)
                 self.image = from_np_array_to_base64(self.image)
                 self.state_service.change_state()
 
-            result = {"state": state, "solders_state": solders_state, "image": self.image}
+            result = {"state": state, "solders_classification": solders_classification, "image": self.image}
             return result
 
     def orchestrate_analysis(self, image):
         # orchestrate analysis
         print(f"Starting image analysis...")
         pcb_flow = PCBFlow(image)
-        result_image, segList = executar_flow(pcb_flow)
-        solders_state = {}
-        return result_image, solders_state
+        result_image, classification = executar_flow(pcb_flow)
+        return result_image, classification
 
     def button_released(self):
         print(f'Button pressed!')
