@@ -11,9 +11,9 @@
         <span
           id="result-{{ i }}"
           class="result-value"
-          [ngClass]="res.value > 0 ? res.color : ''"
+          [ngClass]="(res.value && res.value > 0) ? res.color : ''"
           [ngStyle]="{ 'font-style': '' }"
-          >{{ res.value }}</span
+          >{{ res.value || '-' }}</span
         >
         <label class="result-label" for="result-{{ i }}">{{ res.label }}</label>
       </div>

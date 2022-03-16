@@ -1,9 +1,11 @@
 :root {
     --primary: #3772ff;
     --primary-contrast-dark: #2865f3;
-    --warning: #f6b400;
-    --danger: #e75a7c;
-    --success: #34c759;
+    --yellow: #f6b400;
+    --blue: #3B77D1;
+    --crimson: #df0034;
+    --violet: #7800D4;
+    --green: #34c759;
     --bg: #e6e8e6;
     --text-white: #eeeeee;
     --text-black: #4f4f4f;
@@ -39,4 +41,20 @@
     @media (min-width: 1800px) {
         @content;
     }
+}
+
+.green {
+    color: var(--green);
+}
+.yellow {
+    color: var(--yellow);
+}
+.violet {
+    color: var(--violet);
+}
+.blue {
+    color: var(--blue);
+}
+.crimson {
+    color: var(--crimson);
 }
