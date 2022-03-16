@@ -69,7 +69,7 @@ class SegmentacaoService():
                         r = w//2
                     else:
                         r = h//2
-                    cv.circle(img, (x+w//2, y+h//2), r, (0, 0, 255), 2)
+                    cv.circle(img, (x+w//2, y+h//2), r, (255, 0, 0), 2)
                     soldas = soldas + 1
         print("Quantidade de soldas: ", soldas)
 

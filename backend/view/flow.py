@@ -46,10 +46,10 @@ def executar_flow(pcb_flow : PCBFlow):
     # Classificacao
     pcb_flow.start_timer("Classificação")
 
-    classficacao = classificacaoService.classificar(pcb_flow)
+    classificacao = classificacaoService.classificar(pcb_flow, segList)
 
     pcb_flow.stop_timer("Classificação")
     
-    
+    classificacao = {"qtd_soldas": len(segList), "classificacao": classificacao}
     pcb_flow.print_timers()
-    return img, segList
+    return img, classificacao
