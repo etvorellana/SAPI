@@ -21,7 +21,7 @@ export class WebSocketService<Message> implements OnDestroy {
     return of(environment.baseURL).pipe(
       filter(apiUrl => !!apiUrl),
       // https becomes wws, http becomes ws
-      map(apiUrl => `${apiUrl.replace(/^http/, 'ws')}/ws/${endpoint}`),
+      map(apiUrl => `${apiUrl.replace(/^http/, 'ws')}/${environment.production ? endpoint : 'ws/' + endpoint}`),
       switchMap(wsUrl => {
         if (this.connection$) {
           return this.connection$;

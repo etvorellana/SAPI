@@ -12,7 +12,7 @@
     />
     <span id="topbar-title">SAPI</span>
   </div>
-  <div id="topbar-actions" class="d-flex">
+  <div id="topbar-actions" class="d-flex" *ngIf="!isProductionMode()">
     <ng-container *ngFor="let btn of buttons">
       <app-topbar-button
         class="topbar-button"

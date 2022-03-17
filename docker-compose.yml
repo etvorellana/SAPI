@@ -1,0 +1,13 @@
+version: '3.9'
+services:
+  sapi-frontend:
+    container_name: sapi-frontend-container
+    build: ./frontend
+    ports:
+      - '80:80'
+
+  sapi-backend:
+    container_name: sapi-backend-container
+    build: ./backend
+    ports:
+      - '5000:5000'

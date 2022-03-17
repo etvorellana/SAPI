@@ -53,6 +53,10 @@ export class TopbarComponent implements OnInit {
       this._advancedMode = false
     }
   }
+  
+  isProductionMode() {
+    return environment.production
+  }
 
   toggleMode() {
     this._advancedMode = !this._advancedMode
