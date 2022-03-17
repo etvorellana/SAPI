@@ -67,6 +67,7 @@ export class AnalysisComponent implements OnInit, OnDestroy {
     switch (message.state) {
       case 1:
         // start of process
+        this.updateClassification()
         break
       case 2:
         // watching camera
@@ -89,9 +90,9 @@ export class AnalysisComponent implements OnInit, OnDestroy {
     this.destroyed$.next();
   }
 
-  updateClassification(classification: SoldersClassification) {
+  updateClassification(classification?: SoldersClassification) {
     this.results.forEach(result => {
-      result.value = classification[result.key]
+      result.value = classification ? classification[result.key] : undefined
     })
   }
 }
