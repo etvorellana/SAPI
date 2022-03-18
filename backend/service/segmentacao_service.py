@@ -1,15 +1,31 @@
 from model.pcb_flow import PCBFlow
 import numpy as np
 import cv2 as cv
+import json
+
+from service.classificacao_service import ClassificacaoService
+import model.constantes as constantes
 
 class SegmentacaoService():
-    def tratar(self, pcb_flow : PCBFlow):
-        return self.segment_01(pcb_flow.thrGray, pcb_flow.img_norm)
 
-    def segment_01(self, thrGrey, normRGB):
+    def tratar(self, pcb_flow : PCBFlow):
+        
+        soldas = {
+            constantes.CLASSIFICACAO_SOLDA_BOA[0]: 0,
+            constantes.CLASSIFICACAO_SOLDA_PONTE[0]: 0,
+            constantes.CLASSIFICACAO_SOLDA_AUSENTE[0]: 0,
+            constantes.CLASSIFICACAO_SOLDA_EXCESSO[0]: 0,
+            constantes.CLASSIFICACAO_SOLDA_POUCA[0]: 0
+        }
+
+        thrGrey, normRGB = pcb_flow.thrGray, pcb_flow.img_norm
         #   Copia a imagem com o limiar
         im_floodfill = thrGrey.copy()
         img = normRGB.copy()
+        
+        img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+        img = cv.cvtColor(img, cv.COLOR_GRAY2BGR)
+
 
         #   Cria uma mascara usando a funação floodfill
         #   O tamanho precisa ser 2 pixels a mais que a imagem
@@ -51,8 +67,10 @@ class SegmentacaoService():
         soldaMh = w_soldaG / h_soldaP
         soldaMw = w_soldaP / h_soldaG
 
-        soldas = 0
-        sections = []
+        qtd_soldas = 0
+
+        classificacao_service = ClassificacaoService()
+
         for c in contours:
             M = cv.moments(c)
             if M["m00"] != 0:
@@ -62,15 +80,23 @@ class SegmentacaoService():
                 #if (abs(w - h) < 25) and ((w * h) < 600) and ((w * h) > 200):
                 #if (abs(w - h) < 80) and ((w * h) < 2116) and ((w * h) > 200):
                 if ((w / h) >= soldaMw) and ((w / h) <= soldaMh) and ((w * h) <= soldaG) and ((w * h) >= soldaP):
-                    sections.append((cX, cY, x, y, w, h))
+                    section_info = (cX, cY, x, y, w, h)
                     # cv.circle(img, (cX, cY), 2, (255, 255, 255), -1)
                     #cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
                     if (w>=h):
                         r = w//2
                     else:
                         r = h//2
-                    cv.circle(img, (x+w//2, y+h//2), r, (255, 0, 0), 2)
-                    soldas = soldas + 1
-        print("Quantidade de soldas: ", soldas)
 
-        return img, sections
+                    classificacao = classificacao_service.classificar(pcb_flow, section_info)
+                    
+                    soldas[classificacao[0]] += 1
+                    qtd_soldas += 1
+                    
+                    cv.circle(img, (x+w//2, y+h//2), r, classificacao[1], 2)
+
+        print("Quantidade de soldas: ", qtd_soldas)
+        
+        print(json.dumps(soldas))
+
+        return img, soldas, qtd_soldas
