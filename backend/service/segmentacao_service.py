@@ -18,10 +18,10 @@ class SegmentacaoService():
             constantes.CLASSIFICACAO_SOLDA_POUCA[0]: 0
         }
 
-        thrGrey, normRGB = pcb_flow.thrGray, pcb_flow.img_norm
+        thrGrey, scrRGB = pcb_flow.thrGray, pcb_flow.img_bordas
         #   Copia a imagem com o limiar
         im_floodfill = thrGrey.copy()
-        img = normRGB.copy()
+        img = scrRGB.copy()
         
         img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
         img = cv.cvtColor(img, cv.COLOR_GRAY2BGR)

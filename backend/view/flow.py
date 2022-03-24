@@ -23,7 +23,8 @@ def executar_flow(pcb_flow : PCBFlow):
     # Normalização de cor
     pcb_flow.start_timer("Normalização")
 
-    pcb_flow.img_norm = normalizacaoService.tratar(pcb_flow)
+    #pcb_flow.img_norm = normalizacaoService.tratar(pcb_flow)
+    pcb_flow.img_norm = normalizacaoService.normIllumination(pcb_flow)
 
     pcb_flow.stop_timer("Normalização")
 

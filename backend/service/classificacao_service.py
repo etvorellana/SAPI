@@ -20,7 +20,7 @@ class ClassificacaoService():
         kernel_list.append(np.real(gabor_kernel(0.1, np.pi/4,sigma_x=self.sigmax_init, sigma_y=self.sigmay_init)))
         kernel_list.append(np.real(gabor_kernel(0.3, np.pi/4,sigma_x=self.sigmax_init, sigma_y=self.sigmay_init)))
         
-        cropped_image = pcb_flow.img_norm[segment[3]:segment[3]+segment[5], segment[2]:segment[2]+segment[4]]
+        cropped_image = pcb_flow.img_bordas[segment[3]:segment[3]+segment[5], segment[2]:segment[2]+segment[4]]
 
         lista_valores = []
         for kernel in kernel_list:
