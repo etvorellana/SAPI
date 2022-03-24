@@ -4,8 +4,6 @@ import cv2 as cv
 import math
 
 class NormalizacaoService():
-    def tratar(self, pcb_flow : PCBFlow):
-        return self.normIllumination(pcb_flow.img_bordas)
     
     def normIllumination(self, pcb_flow : PCBFlow, DCTdistance = 10, dataType = "float64", base = 2):
         
