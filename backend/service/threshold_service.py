@@ -1,7 +1,5 @@
 from model.pcb_flow import PCBFlow
 import numpy as np
-from skimage.color import rgb2yiq
-import cv2 as cv
 
 class ThresholdService():
     def tratar(self, pcb_flow : PCBFlow):
