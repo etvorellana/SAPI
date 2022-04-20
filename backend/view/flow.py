@@ -9,7 +9,6 @@ deteccaoBordasService : DeteccaoBordasService = DeteccaoBordasService()
 normalizacaoService : NormalizacaoService = NormalizacaoService()
 thresholdService : ThresholdService = ThresholdService()
 segmentacaoService : SegmentacaoService = SegmentacaoService()
-classificacaoService : ClassificacaoService = ClassificacaoService()
 
 def executar_flow(pcb_flow : PCBFlow):
     # Detecção de bordas
