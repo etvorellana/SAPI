@@ -83,7 +83,7 @@ O servidor pode ser acessado pelo endereço ```http://localhost:5000/```
 ### Executando em Container
 ```sh
 > cd backend
-> docker build -t sapi-backend .
+> docker build --network host -t sapi-backend .
 > docker run -p 5000:5000 --network="host" sapi-backend
 ```
 
@@ -101,7 +101,7 @@ A aplicação estará disponível em `http://localhost:4200/`
 ### Executando em Container
 ```sh
 > cd frontend
-> docker build -t sapi-frontend .
+> docker build --network host -t sapi-frontend .
 > docker run -p 80:80 --network="host" sapi-frontend
 ```
 
