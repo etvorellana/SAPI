@@ -1,12 +1,12 @@
-FROM python:3-slim
+FROM jjhickman/opencv-python:full
 
 # cv2 dependencies
-RUN apt-get update
-RUN apt-get install ffmpeg libsm6 libxext6  -y
+RUN apt update
+# RUN apt install ffmpeg libsm6 libxext6 build-essential -y
 
 WORKDIR /app
-COPY requirements.txt ./
-RUN pip3 install --no-cache-dir -r requirements.txt
+COPY requirements-prod.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 

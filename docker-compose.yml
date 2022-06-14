@@ -1,13 +1,15 @@
 version: '3.9'
 services:
-  sapi-frontend:
-    container_name: sapi-frontend-container
-    build: ./frontend
-    ports:
-      - '80:80'
+  # sapi-frontend:
+  #   container_name: sapi-frontend-container
+  #   build: ./frontend
+  #   network_mode: "host"
+  #   ports:
+  #     - '80:80'
 
   sapi-backend:
     container_name: sapi-backend-container
     build: ./backend
+    network_mode: "host"
     ports:
       - '5000:5000'
