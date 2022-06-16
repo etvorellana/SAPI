@@ -5,40 +5,31 @@ RUN apt-get update
 RUN apt-get install ffmpeg libsm6 libxext6 build-essential -y
 RUN apt-get install python3-dev -y
 RUN apt-get install python3-numpy -y
-RUN apt-get install python3-skimage -y
-RUN apt-get install python3-gpiozero -y
-RUN apt-get install python3-opencv -y
 
 ENV READTHEDOCS=True
+ENV DEFAULT_CAMERA_WIDTH=1024
+ENV DEFAULT_IMAGE_WIDTH=1024
+ENV FLASK_APP=app
+ENV FLASK_ENV=production
 
 WORKDIR /app
-ADD requirements-prod.txt ./requirements.txt
 
 RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+# RUN pip install --no-cache-dir numpy==1.22.2
+RUN pip install --no-cache-dir opencv-python-headless==4.5.5.62
+RUN pip install --no-cache-dir scikit-image==0.19.1
+RUN pip install --no-cache-dir python-dotenv==0.19.2
+RUN pip install --no-cache-dir Flask==2.0.2
+RUN pip install --no-cache-dir flask_sock==0.4.0
+RUN pip install --no-cache-dir gpiozero==1.6.2
+RUN pip install --no-cache-dir imutils==0.5.4
+RUN pip install --no-cache-dir picamera==1.13
+
+RUN apt-get autoclean
+RUN apt-get autoremove
+RUN apt-get clean
 
 ADD . .
+RUN rm .env
 
-CMD [ "python3", "-m", "flask", "run", "--host=0.0.0.0" ]
-
-
-
-#https://hub.docker.com/r/openruntimes/python
-# FROM openruntimes/python:3.9 
-
-##https://hub.docker.com/r/whip/python
-#FROM whip/python:3.9-alpine
-
-# cv2 dependencies
-# RUN apt update
-# RUN apt install ffmpeg libsm6 libxext6 build-essential -y
-
-# WORKDIR /app
-# COPY requirements-prod.txt ./requirements.txt
-# RUN pip install --no-cache-dir -r requirements.txt
-
-# COPY . .
-# CMD [ "python3", "-m", "flask", "run", "--host=0.0.0.0" ]
-
-# Comment CMD and enable this for container debugging
-# ENTRYPOINT ["tail", "-f", "/dev/null"]
+CMD [ "python3", "app.py" ]
