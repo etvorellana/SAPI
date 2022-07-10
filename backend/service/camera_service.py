@@ -2,7 +2,6 @@ import os
 import time
 import cv2 as cv
 import imutils
-import numpy
 
 class CameraService():
     def __init__(self):
@@ -41,15 +40,13 @@ class CameraService():
             image = cv.imread(cv.samples.findFile("./Flow/Base da dados/Pi camera/PCB_009.png"))
             return image
 
+        self.camera.set(cv.CAP_PROP_FRAME_WIDTH, 2592)
+        self.camera.set(cv.CAP_PROP_FRAME_HEIGHT, 1952)
         success, frame = self.camera.read()
 
         if not success:
             return None
 
-        flag, encoded_frame = cv.imencode('.png', frame)
-
-        if not flag:
-            return None
-
-        bytes_as_np_array = numpy.frombuffer(encoded_frame, dtype=numpy.uint8)
-        return cv.imdecode(bytes_as_np_array, cv.IMREAD_UNCHANGED)
+        cv.imwrite("./media/frame.png", frame)
+        image = cv.imread(cv.samples.findFile("./media/frame.png"))
+        return image

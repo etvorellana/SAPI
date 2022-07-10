@@ -14,7 +14,8 @@ class AnalysisService:
         self.button_pressed = False
         pi_button.when_released = self.button_released
         self.state_service = StateService()
-        self.camera_service = CameraService()
+        from controller.camera_controller import camera_service
+        self.camera_service = camera_service
         self.started = False
         self.frame_to_process = None
         self.image = None
@@ -30,35 +31,41 @@ class AnalysisService:
 
     def orchestrate_state(self):
         with self.lock:
-            state = self.state_service.state
-            solders_classification = None
+            try:
+                state = self.state_service.state
+                solders_classification = None
 
-            if self.button_pressed:
-                self.state_service.change_state()
-                self.button_pressed = False
+                if self.button_pressed:
+                    self.state_service.change_state()
+                    self.button_pressed = False
 
-            if state == 1:
-                self.image = None
-                self.state_service.change_state()
-            elif state == 3:
-                self.frame_to_process = self.camera_service.get_frame()
-                image_width = int(os.environ.get("DEFAULT_IMAGE_WIDTH"))
-                self.image = imutils.resize(self.frame_to_process, width=image_width)
-                self.image = from_np_array_to_base64(self.image)
-                self.state_service.change_state()
-            elif state == 4:
-                if self.frame_to_process is None:
-                    print("No frame set for analysis!")
-                    raise RuntimeError("Unable to acquire frame for analysis.")
-                result_image, solders_classification = self.orchestrate_analysis(self.frame_to_process)
-                image_width = int(os.environ.get("DEFAULT_IMAGE_WIDTH"))
-                self.image = imutils.resize(result_image, width=image_width)
-                self.image = from_np_array_to_base64(self.image)
-                self.classification = solders_classification
-                self.state_service.change_state()
+                if state == 1:
+                    self.image = None
+                    self.state_service.change_state()
+                elif state == 3:
+                    self.frame_to_process = self.camera_service.get_frame()
+                    image_width = int(os.environ.get("DEFAULT_IMAGE_WIDTH"))
+                    self.image = imutils.resize(self.frame_to_process, width=image_width)
+                    self.image = from_np_array_to_base64(self.image)
+                    self.state_service.change_state()
+                elif state == 4:
+                    if self.frame_to_process is None:
+                        print("No frame set for analysis!")
+                        raise RuntimeError("Unable to acquire frame for analysis.")
+                    result_image, solders_classification = self.orchestrate_analysis(self.frame_to_process)
+                    image_width = int(os.environ.get("DEFAULT_IMAGE_WIDTH"))
+                    self.image = imutils.resize(result_image, width=image_width)
+                    self.image = from_np_array_to_base64(self.image)
+                    self.classification = solders_classification
+                    self.state_service.change_state()
 
-            result = {"state": state, "solders_classification": self.classification, "image": self.image}
-            return result
+                result = {"state": state, "solders_classification": self.classification, "image": self.image}
+                return result
+            except Exception as ex:
+                print(f"Erro during orchestrate state: {ex}")
+                self.state_service.set_state(2)
+                result = {"state": 2, "solders_classification": None, "image": None}
+                return result
 
     def orchestrate_analysis(self, image):
         # orchestrate analysis
