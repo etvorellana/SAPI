@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-from controller.analysis_controller import analysis_blueprint
+from controller.process_controller import analysis_blueprint
 from controller.button_controller import button_blueprint
 from controller.camera_controller import camera_blueprint
 
