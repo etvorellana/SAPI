@@ -1,32 +1,31 @@
 import numpy as np
 import cv2
 from csv import reader
-from skimage.filters import gabor_kernel
+from service.filtros.dct_service import DctService
+from service.filtros.log_gabor_service import LogGaborService
 from model.pcb_flow import PCBFlow
 import model.constantes as constantes
 
 class ClassificacaoService():
     def __init__(self):
-        self.theta_init = 0
-        self.freq_init = 0.1
-        self.sigmax_init = 3
-        self.sigmay_init = 3
         self.lista_base = ClassificacaoService.obter_base_dados()
 
-    def classificar(self, pcb_flow : PCBFlow, segment):
-        kernel_list = []
-        kernel_list.append(np.real(gabor_kernel(0.1, 0,sigma_x=self.sigmax_init, sigma_y=self.sigmay_init)))
-        kernel_list.append(np.real(gabor_kernel(0.3, 0,sigma_x=self.sigmax_init, sigma_y=self.sigmay_init)))
-        kernel_list.append(np.real(gabor_kernel(0.1, np.pi/4,sigma_x=self.sigmax_init, sigma_y=self.sigmay_init)))
-        kernel_list.append(np.real(gabor_kernel(0.3, np.pi/4,sigma_x=self.sigmax_init, sigma_y=self.sigmay_init)))
-        
+    def classificar(self, pcb_flow : PCBFlow, segment, filter = 2):
         cropped_image = pcb_flow.img_bordas[segment[3]:segment[3]+segment[5], segment[2]:segment[2]+segment[4]]
-
         lista_valores = []
-        for kernel in kernel_list:
-            soma, desvio = ClassificacaoService.operacao_gabor(cropped_image, kernel)
-            lista_valores.append(soma)
-            lista_valores.append(desvio)
+
+        print("Aplicando filtro...")
+        if filter == 1:
+            gaborService = LogGaborService()
+            lista_valores = gaborService.gaborSum(cropped_image)
+        elif filter == 2:
+            dctService = DctService()
+            lista_valores = dctService.dctSum(cropped_image)
+        else:
+            print("Filtro não informado!")
+            return
+
+        print("Classificando...")
 
         classificacao = ClassificacaoService.calculo(lista_valores, self.lista_base[0:200], self.lista_base[200:400], self.lista_base[400:600], self.lista_base[600:800], self.lista_base[800:1000])
 
@@ -48,12 +47,6 @@ class ClassificacaoService():
             lista_soldas[x] = list(map(float, lista_soldas[x]))
 
         return lista_soldas
-
-    def operacao_gabor(img_solda, kernel):
-        img_solda = cv2.cvtColor(img_solda, cv2.COLOR_BGR2GRAY)
-        soma = np.sum(cv2.filter2D(img_solda, cv2.CV_8UC3, kernel))
-        desvio = np.std(cv2.filter2D(img_solda, cv2.CV_8UC3, kernel))
-        return soma, desvio
 
     def calculo(l_teste, l_treinamento_boa, l_treinamento_pouca, l_treinamento_ponte, l_treinamento_excesso, l_treinamento_ausente):
         classificacao = []
