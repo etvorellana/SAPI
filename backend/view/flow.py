@@ -3,7 +3,6 @@ from service.deteccao_bordas_service import DeteccaoBordasService
 from service.normalizacao_service import NormalizacaoService
 from service.threshold_service import ThresholdService
 from service.segmentacao_service import SegmentacaoService
-from service.classificacao_service import ClassificacaoService
 
 deteccaoBordasService : DeteccaoBordasService = DeteccaoBordasService()
 normalizacaoService : NormalizacaoService = NormalizacaoService()

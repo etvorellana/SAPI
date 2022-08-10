@@ -2,9 +2,9 @@ import os
 import threading
 import time
 import imutils
+import service.filter_service as filter_service
 from model.pcb_flow import PCBFlow
 from service.state_service import StateService
-from service.camera_service import CameraService
 from view.flow import executar_flow
 from util.img_util import from_np_array_to_base64
 
@@ -70,7 +70,7 @@ class AnalysisService:
     def orchestrate_analysis(self, image):
         # orchestrate analysis
         print(f"Starting image analysis...")
-        pcb_flow = PCBFlow(image)
+        pcb_flow = PCBFlow(image, filtro=filter_service.current_filter)
         result_image, classification = executar_flow(pcb_flow)
         return result_image, classification
 
