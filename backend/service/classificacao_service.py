@@ -1,5 +1,6 @@
+import math
 import numpy as np
-import cv2
+import cv2 as cv
 from csv import reader
 from service.filtros.dct_service import DctService
 from service.filtros.log_gabor_service import LogGaborService
@@ -10,19 +11,23 @@ class ClassificacaoService():
     def __init__(self):
         self.lista_base = ClassificacaoService.obter_base_dados()
 
-    def classificar(self, pcb_flow : PCBFlow, segment, filter = 2):
-        cropped_image = pcb_flow.img_bordas[segment[3]:segment[3]+segment[5], segment[2]:segment[2]+segment[4]]
+    def classificar(self, pcb_flow : PCBFlow, segment):
         lista_valores = []
 
         print("Aplicando filtro...")
-        if filter == 1:
+        if pcb_flow.filtro == 1:
+            cropped_image = pcb_flow.img_bordas[segment[3]:segment[3]+segment[5], segment[2]:segment[2]+segment[4]]
             gaborService = LogGaborService()
             lista_valores = gaborService.gaborSum(cropped_image)
-        elif filter == 2:
+        elif pcb_flow.filtro == 2:
             dctService = DctService()
+            dct_filtered_img = dctService.dct_filter(pcb_flow.img_bordas)
+            cropped_image = dct_filtered_img[segment[3]:segment[3]+segment[5], segment[2]:segment[2]+segment[4]]
             lista_valores = dctService.dctSum(cropped_image)
+        elif pcb_flow.filtro == 3:
+            pass
         else:
-            print("Filtro não informado!")
+            print("Filtro inválido!")
             return
 
         print("Classificando...")
