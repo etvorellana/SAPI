@@ -2,12 +2,18 @@ import {
   animate, state,
   style, transition, trigger
 } from '@angular/animations';
-import { Component, OnInit, Renderer2 } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { AnalysisService } from '../../services/analysis.service';
 import { UploadService } from '../../services/upload.service';
 
 type TopbarButton = { text: string, icon: string, action: () => void, advancedOnly?: boolean };
+type TopbarDropdownButton = {
+  id: string,
+  text: string,
+  type: string,
+  advancedOnly?: boolean
+};
 
 @Component({
   selector: 'app-topbar',
@@ -46,14 +52,31 @@ export class TopbarComponent implements OnInit {
     }
   ]
 
-  constructor(private analysisService: AnalysisService, private uploadService: UploadService) { }
+  buttonsDropdown: TopbarDropdownButton[] = [
+    {
+      id: 'steps-dropdown',
+      text: 'Etapas',
+      type: 'steps',
+      advancedOnly: true
+    },
+    {
+      id: 'filter-dropdown',
+      text: 'Filtro',
+      type: 'filter',
+      advancedOnly: true
+    }
+  ]
+
+  constructor(private analysisService: AnalysisService,
+    private uploadService: UploadService
+  ) { }
 
   ngOnInit(): void {
     if (environment.production) {
       this._advancedMode = false
     }
   }
-  
+
   isProductionMode() {
     return environment.production
   }
@@ -70,7 +93,6 @@ export class TopbarComponent implements OnInit {
     this.uploadService.upload('.png').then(res => {
       if (res) {
         this.analysisService.sendImage(res[0]).subscribe({
-          next: () => {},
           error: () => {
             alert('Erro ao enviar imagem')
           }
