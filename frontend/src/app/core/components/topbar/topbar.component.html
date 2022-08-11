@@ -24,22 +24,33 @@
       ></app-topbar-button>
     </ng-container>
 
-    <div ngbDropdown id="steps-dropdown" class="d-flex">
-      <app-topbar-button
-        [attr.advanced]="_advancedMode"
-        id="steps-dropdown-toggle"
-        *ngIf="_advancedMode"
-        icon="steps"
-        text="Etapas"
-        ngbDropdownToggle
-      ></app-topbar-button>
+    <ng-container *ngFor="let btn of buttonsDropdown">
+      <div ngbDropdown [id]="btn.id" class="d-flex">
+        <app-topbar-button
+          [attr.advanced]="btn.advancedOnly"
+          [id]="btn.id + '-toggle'"
+          *ngIf="_advancedMode || !btn.advancedOnly"
+          [icon]="btn.type"
+          [text]="btn.text"
+          ngbDropdownToggle
+        ></app-topbar-button>
 
-      <app-steps-dropdown
-        ngbDropdownMenu
-        class="p-0"
-        aria-labelledby="steps-dropdown-toggle"
-      ></app-steps-dropdown>
-    </div>
+        <ng-container [ngSwitch]="btn.type">
+          <app-steps-dropdown
+            *ngSwitchCase="'steps'"
+            ngbDropdownMenu
+            class="p-0"
+            aria-labelledby="steps-dropdown-toggle"
+          ></app-steps-dropdown>
+          <app-filter-dropdown
+            *ngSwitchCase="'filter'"
+            ngbDropdownMenu
+            class="p-0"
+            aria-labelledby="filter-dropdown-toggle"
+          ></app-filter-dropdown>
+        </ng-container>
+      </div>
+    </ng-container>
   </div>
   <button id="configs-action" class="btn">
     <img src="assets/image/icon/cog.svg" alt="cog icon" />

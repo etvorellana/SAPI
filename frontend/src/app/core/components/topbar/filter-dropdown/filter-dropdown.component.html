@@ -1,0 +1,20 @@
+<div id="filters-wrapper">
+  <ul class="list-group">
+    <li
+      *ngFor="let filter of _filters; let i = index"
+      class="list-group-item d-flex justify-content-between align-items-center"
+    >
+      <span id="filter{{ i }}-label" class="text-nowrap">{{
+        filter.label
+      }}</span>
+      <div class="form-check form-switch ms-4">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          [ngModel]="selected === filter.value"
+          (click)="changeFilter(filter.value, $event)"
+        />
+      </div>
+    </li>
+  </ul>
+</div>
