@@ -33,4 +33,12 @@ export class AnalysisService {
   clear() {
     return this.http.post(`${environment.baseURL}/analysis/clear`, undefined);
   }
+
+  setFilter(filter: number) {
+    return this.http.post(`${environment.baseURL}/filter`, filter);
+  }
+
+  getFilter() {
+    return this.http.get<number>(`${environment.baseURL}/filter`);
+  }
 }

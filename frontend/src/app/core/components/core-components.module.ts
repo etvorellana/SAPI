@@ -5,16 +5,20 @@ import { StepsDropdownComponent } from './topbar/steps-dropdown/steps-dropdown.c
 import { TopbarComponent } from './topbar/topbar.component';
 import { TopbarButtonComponent } from './topbar/topbar-button/topbar-button.component';
 import { SpinnerComponent } from './spinner/spinner.component';
+import { FilterDropdownComponent } from './topbar/filter-dropdown/filter-dropdown.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
     TopbarComponent,
     StepsDropdownComponent,
     TopbarButtonComponent,
-    SpinnerComponent
+    SpinnerComponent,
+    FilterDropdownComponent
   ],
   imports: [
     CommonModule,
+    FormsModule,
     NgbDropdownModule
   ],
   exports: [
