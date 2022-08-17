@@ -18,8 +18,8 @@ export class FilterDropdownComponent implements OnInit {
     this._filters = Object.entries(Filters)
       .map((entry) => ({ label: entry[1], value: Number(entry[0]) }))
 
-    this.service.getFilter().subscribe((filter) => {
-      this.selected = filter;
+    this.service.getFilter().subscribe((response) => {
+      this.selected = response.current_filter;
     })
   }
 

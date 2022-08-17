@@ -5,6 +5,8 @@ import { AnalysisStep } from '../models/analysis-step.enum';
 import { WebSocketService } from './websocket.service';
 import { Message } from '../models/message';
 
+type CurrentFilter = { current_filter: number }
+
 @Injectable({
   providedIn: 'root'
 })
@@ -35,10 +37,10 @@ export class AnalysisService {
   }
 
   setFilter(filter: number) {
-    return this.http.post(`${environment.baseURL}/filter`, filter);
+    return this.http.post(`${environment.baseURL}/filter`, { filter });
   }
 
   getFilter() {
-    return this.http.get<number>(`${environment.baseURL}/filter`);
+    return this.http.get<CurrentFilter>(`${environment.baseURL}/filter`);
   }
 }
