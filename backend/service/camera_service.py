@@ -14,7 +14,7 @@ class CameraService():
     def get_feed(self):
         while True:
             camera_width = int(os.environ.get("DEFAULT_CAMERA_WIDTH"))
-            if self.camera.isOpened():
+            if self.camera.isOpened() and os.environ.get("USE_CAMERA") == "true":
                 success, frame = self.camera.read()
 
                 if not success:
@@ -42,8 +42,8 @@ class CameraService():
                 time.sleep(0.06)
 
     def get_frame(self):
-        if not self.camera.isOpened():
-            image = cv.imread(cv.samples.findFile("./Flow/Base da dados/Pi camera/PCB_009.png"))
+        if not self.camera.isOpened() or os.environ.get("USE_CAMERA") == "false":
+            image = cv.imread(cv.samples.findFile("./media/pcb-sample.png"))
             return image
 
         self.camera.set(cv.CAP_PROP_FRAME_WIDTH, 2592)
