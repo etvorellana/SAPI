@@ -5,10 +5,7 @@ import imutils
 
 class CameraService():
     def __init__(self):
-        if os.environ.get("FLASK_ENV") == "production":
-            self.camera = cv.VideoCapture(0)
-        else:
-            self.camera = cv.VideoCapture("./media/video_sample.mp4")
+        self.camera = cv.VideoCapture(0)
         self.camera.set(cv.CAP_PROP_BUFFERSIZE, 1)
 
     def __del__(self):
@@ -16,27 +13,36 @@ class CameraService():
 
     def get_feed(self):
         while True:
-            success, frame = self.camera.read()
-
-            if not success:
-                self.camera.set(cv.CAP_PROP_POS_FRAMES, 0)
-                continue
-
             camera_width = int(os.environ.get("DEFAULT_CAMERA_WIDTH"))
-            frame = imutils.resize(frame, width=camera_width)
+            if self.camera.isOpened():
+                success, frame = self.camera.read()
 
-            flag, encoded_frame = cv.imencode('.jpg', frame)
+                if not success:
+                    self.camera.set(cv.CAP_PROP_POS_FRAMES, 0)
+                    continue
 
-            if not flag:
-                continue
+                frame = imutils.resize(frame, width=camera_width)
 
-            output_frame = bytearray(encoded_frame)
+                flag, encoded_frame = cv.imencode('.jpg', frame)
 
-            yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + output_frame + b'\r\n')
-            time.sleep(0.06)
+                if not flag:
+                    continue
+
+                output_frame = bytearray(encoded_frame)
+
+                yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + output_frame + b'\r\n')
+                time.sleep(0.06)
+            else:
+                output_frame = cv.imread(cv.samples.findFile("./media/no-camera.png"))
+                output_frame = imutils.resize(output_frame, width=camera_width)
+                flag, encoded_frame = cv.imencode('.jpg', output_frame)
+                output_frame = bytearray(encoded_frame)
+
+                yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + output_frame + b'\r\n')
+                time.sleep(0.06)
 
     def get_frame(self):
-        if os.environ.get("FLASK_ENV") == "development":
+        if not self.camera.isOpened():
             image = cv.imread(cv.samples.findFile("./Flow/Base da dados/Pi camera/PCB_009.png"))
             return image
 
