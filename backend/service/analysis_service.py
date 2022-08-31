@@ -62,7 +62,7 @@ class AnalysisService:
                 result = {"state": state, "solders_classification": self.classification, "image": self.image}
                 return result
             except Exception as ex:
-                print(f"Erro during orchestrate state: {ex}")
+                print(f"Error during orchestrate state: {ex}")
                 self.state_service.set_state(2)
                 result = {"state": 2, "solders_classification": None, "image": None}
                 return result
