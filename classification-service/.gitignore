@@ -1,0 +1,14 @@
+# Nome da pasta do ambiente virtual
+rpi-cam-prototype-env-old
+rpi-cam-prototype-env
+
+# Script de execução
+Flow/run_test.sh
+
+__pycache__
+
+# Arquivos teste de saída
+seg_test.png
+Flow/seg_test.png
+/Flow/Testes Placas MCM_v1
+/media/frame.png

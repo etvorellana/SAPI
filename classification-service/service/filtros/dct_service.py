@@ -11,6 +11,10 @@ class DctService():
         lut = np.asarray([math.log(i, 2) for i in (np.arange(0, 256) + 1)], "float64")
         img_log = cv.LUT(gray_img, lut)
         dctImage = cv.dct(img_log)
+        imgMax = np.max(dctImage)
+        imgMin = np.min(dctImage)
+        dctImage -= imgMin
+        dctImage /= (imgMax-imgMin)
         return dctImage
 
     def operacao_dct(self, img_solda):

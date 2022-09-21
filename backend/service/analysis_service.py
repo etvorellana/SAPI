@@ -1,12 +1,19 @@
+import base64
+import io
 import os
 import threading
 import time
+
+import cv2 as cv
 import imutils
-import service.filter_service as filter_service
-from model.pcb_flow import PCBFlow
-from service.state_service import StateService
-from view.flow import executar_flow
+import numpy
+import requests
+from PIL import Image
 from util.img_util import from_np_array_to_base64
+
+import service.filter_service as filter_service
+from service.state_service import StateService
+
 
 class AnalysisService:
     def __init__(self):
@@ -69,10 +76,16 @@ class AnalysisService:
 
     def orchestrate_analysis(self, image):
         # orchestrate analysis
-        print(f"Starting image analysis...")
-        pcb_flow = PCBFlow(image, filtro=filter_service.current_filter)
-        result_image, classification = executar_flow(pcb_flow)
-        return result_image, classification
+        print(f"Calling remote image analysis...")
+        url = os.environ.get("ANALYSIS_ENDPOINT")
+        payload = { "image": from_np_array_to_base64(image), "filter": filter_service.current_filter }
+        result = requests.post(url, json = payload)
+        if (not result.ok):
+            raise RuntimeError("Received error response from remote analysis server")
+        img_data = base64.b64decode(result.json()["image"])
+        pil_img = Image.open(io.BytesIO(img_data))
+        img = cv.cvtColor(numpy.array(pil_img), cv.COLOR_BGR2RGB)
+        return img, result.json()["classification"]
 
     def button_released(self):
         print(f'Button pressed!')
