@@ -15,13 +15,9 @@ sock = Sock(analysis_blueprint)
 analysis_service = AnalysisService()
 analysis_thread = threading.Thread(target=analysis_service.start, args=(), daemon=True)
 analysis_thread.start()
-global connection_count
-connection_count = 0
 
 @sock.route('')
 def analysis(sock):
-    global connection_count
-    connection_count += 1
 
     try:
         if analysis_service.started:
@@ -53,9 +49,7 @@ def analysis(sock):
     except Exception as ex:
         print(f"Unexpected error occurred. {ex}")
 
-    connection_count -= 1
-    if connection_count == 0:
-        analysis_service.started = False
+    analysis_service.started = False
 
     sock.close()
 
