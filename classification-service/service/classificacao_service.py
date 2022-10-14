@@ -1,9 +1,11 @@
 import numpy as np
 from csv import reader
 from service.filtros.dct_service import DctService
+from service.filtros.dwt_service import DwtService
 from service.filtros.log_gabor_service import LogGaborService
 from model.pcb_flow import PCBFlow
 import model.constantes as constantes
+import pywt
 
 class ClassificacaoService():
     def __init__(self):
@@ -24,7 +26,11 @@ class ClassificacaoService():
             lista_valores = dctService.dctSum(cropped_image)
             classificacao = ClassificacaoService.calculo(lista_valores, self.lista_base_dct[0:200], self.lista_base_dct[200:400], self.lista_base_dct[400:600], self.lista_base_dct[600:800], self.lista_base_dct[800:1000])
         elif pcb_flow.filtro == 3:
-            pass
+            cropped_image = pcb_flow.img_bordas[segment[3]:segment[3]+segment[5], segment[2]:segment[2]+segment[4]]
+            dwtService = DwtService()
+            dwt_filtered_img = dwtService.dwt_filter(cropped_image)
+            lista_valores = dwtService.dwtSum(dwt_filtered_img)
+            classificacao = ClassificacaoService.calculo(lista_valores, self.lista_base_dct[0:200], self.lista_base_dct[200:400], self.lista_base_dct[400:600], self.lista_base_dct[600:800], self.lista_base_dct[800:1000])
         else:
             print("Filtro inválido!")
             return
