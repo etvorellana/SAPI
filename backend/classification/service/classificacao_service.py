@@ -9,7 +9,7 @@ import pywt
 
 class ClassificacaoService():
     def __init__(self):
-        self.lista_base_gabor, self.lista_base_dct = ClassificacaoService.obter_base_dados()
+        self.lista_base_gabor, self.lista_base_dct, self.lista_soldas_dwt = ClassificacaoService.obter_base_dados()
 
     def classificar(self, pcb_flow : PCBFlow, segment):
         lista_valores = []
@@ -30,7 +30,7 @@ class ClassificacaoService():
             dwtService = DwtService()
             dwt_filtered_img = dwtService.dwt_filter(cropped_image)
             lista_valores = dwtService.dwtSum(dwt_filtered_img)
-            classificacao = ClassificacaoService.calculo(lista_valores, self.lista_base_dct[0:200], self.lista_base_dct[200:400], self.lista_base_dct[400:600], self.lista_base_dct[600:800], self.lista_base_dct[800:1000])
+            classificacao = ClassificacaoService.calculo(lista_valores, self.lista_soldas_dwt[0:200], self.lista_soldas_dwt[200:400], self.lista_soldas_dwt[400:600], self.lista_soldas_dwt[600:800], self.lista_soldas_dwt[800:1000])
         else:
             print("Filtro inválido!")
             return
@@ -40,6 +40,7 @@ class ClassificacaoService():
     def obter_base_dados():
         lista_soldas_gabor = []
         lista_soldas_dct = []
+        lista_soldas_dwt = []
 
         with open('media/Gabor_1k.csv', 'r') as csv_file:
             csv_reader = reader(csv_file)
@@ -49,11 +50,17 @@ class ClassificacaoService():
             csv_reader = reader(csv_file)
             lista_soldas_dct = list(csv_reader)
 
+        with open('media/Dwt.csv', 'r') as csv_file:
+            csv_reader = reader(csv_file)
+            lista_soldas_dwt = list(csv_reader)
+
         del lista_soldas_gabor[0]
         del lista_soldas_dct[0]
+        del lista_soldas_dwt[0]
 
         print("Tamanho do conjunto de treinamento gabor: ", len(lista_soldas_gabor))
         print("Tamanho do conjunto de treinamento dct: ", len(lista_soldas_dct))
+        print("Tamanho do conjunto de treinamento dwt: ", len(lista_soldas_dwt))
 
         tam = len(lista_soldas_gabor)
         for x in range(tam):
@@ -63,7 +70,11 @@ class ClassificacaoService():
         for x in range(tam):
             lista_soldas_dct[x] = list(map(float, lista_soldas_dct[x]))
 
-        return lista_soldas_gabor, lista_soldas_dct
+        tam = len(lista_soldas_dwt)
+        for x in range(tam):
+            lista_soldas_dwt[x] = list(map(float, lista_soldas_dwt[x]))
+
+        return lista_soldas_gabor, lista_soldas_dct, lista_soldas_dwt
 
     def calculo(l_teste, l_treinamento_boa, l_treinamento_pouca, l_treinamento_ponte, l_treinamento_excesso, l_treinamento_ausente):
         classificacao = []
