@@ -1,4 +1,5 @@
 import numpy as np
+import cv2 as cv
 import pywt
 
 class DwtService():
@@ -6,7 +7,8 @@ class DwtService():
         pass
 
     def dwt_filter(self, img):
-        (cA, cD) = pywt.dwt(img, 'db1')
+        gray_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+        (cA, cD) = pywt.dwt(gray_img, 'db1')
         return cA
 
     def operacao_dwt(self, img_solda):

@@ -3,8 +3,10 @@ import cv2
 import numpy as np
 from skimage.filters import gabor_kernel
 import imageio
+import sys
 
-from dct import dct_filter, dctSum
+sys.path.append('../')
+from backend.classification.service.filtros.dct_service import DctService
 #import os
 #from PIL import Image
 
@@ -43,69 +45,45 @@ carrega_img('Soldas_pouca', O_soldas_pouca, 200)
 
 #k = len(images)
 
-#### Passa as imagens para escala de cinza
-
-for i in range(200):
-	O_soldas_boas[i] = cv2.cvtColor(O_soldas_boas[i], cv2.COLOR_BGR2GRAY)
-	L_classe.append(0)
-
-for i in range(200):
-	# O_soldas_boas[i] = cv2.cvtColor(O_soldas_boas[i], cv2.COLOR_BGR2GRAY)
-	O_soldas_ponte[i] = cv2.cvtColor(O_soldas_ponte[i], cv2.COLOR_BGR2GRAY)
-	O_soldas_ausente[i] = cv2.cvtColor(O_soldas_ausente[i], cv2.COLOR_BGR2GRAY)
-	O_soldas_excesso[i] = cv2.cvtColor(O_soldas_excesso[i], cv2.COLOR_BGR2GRAY)
-	O_soldas_pouca[i] = cv2.cvtColor(O_soldas_pouca[i], cv2.COLOR_BGR2GRAY)
-
-for i in range(200):
-	L_classe.append(1)
-
-for i in range(200):
-	L_classe.append(2)
-
-for i in range(200):
-	L_classe.append(3)
-
-for i in range(200):
-	L_classe.append(4)
-
+dctService = DctService()
 ###########################################
 ####### Operações com as soldas boas ######
 ###########################################
 for i in range(200):
-	dct_filtered_img = dct_filter(O_soldas_boas[i])
-	lista_valores = dctSum(dct_filtered_img)
+	dct_filtered_img = dctService.dct_filter(O_soldas_boas[i])
+	lista_valores = dctService.dctSum(dct_filtered_img)
 	images[i] = lista_valores
 
 ##############################################
 ####### Operações com as soldas em ponte #####
 ##############################################
 for i in range(200):
-	dct_filtered_img = dct_filter(O_soldas_ponte[i])
-	lista_valores = dctSum(dct_filtered_img)
+	dct_filtered_img = dctService.dct_filter(O_soldas_ponte[i])
+	lista_valores = dctService.dctSum(dct_filtered_img)
 	images[i + 200] = lista_valores
 
 #############################################
 ####### Operações com as soldas ausente #####
 #############################################
 for i in range(200):
-	dct_filtered_img = dct_filter(O_soldas_ausente[i])
-	lista_valores = dctSum(dct_filtered_img)
+	dct_filtered_img = dctService.dct_filter(O_soldas_ausente[i])
+	lista_valores = dctService.dctSum(dct_filtered_img)
 	images[i + 400] = lista_valores
 
 #############################################
 ####### Operações com as soldas excesso #####
 #############################################
 for i in range(200):
-	dct_filtered_img = dct_filter(O_soldas_excesso[i])
-	lista_valores = dctSum(dct_filtered_img)
+	dct_filtered_img = dctService.dct_filter(O_soldas_excesso[i])
+	lista_valores = dctService.dctSum(dct_filtered_img)
 	images[i + 600] = lista_valores
 
 ##########################################
 ####### Operações com as soldas pouca ####
 ##########################################
 for i in range(200):
-	dct_filtered_img = dct_filter(O_soldas_pouca[i])
-	lista_valores = dctSum(dct_filtered_img)
+	dct_filtered_img = dctService.dct_filter(O_soldas_pouca[i])
+	lista_valores = dctService.dctSum(dct_filtered_img)
 	images[i + 800] = lista_valores
 
 
