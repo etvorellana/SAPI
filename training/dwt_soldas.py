@@ -2,8 +2,10 @@ import pandas as pd
 import cv2
 import numpy as np
 import imageio
+import sys
 
-from dwt_service import DwtService
+sys.path.append('../')
+from backend.classification.service.filtros.dwt_service import DwtService
 #import os
 #from PIL import Image
 
@@ -40,18 +42,6 @@ carrega_img('Soldas_excesso', O_soldas_excesso, 200)
 carrega_img('Soldas_pouca', O_soldas_pouca, 200)
 
 #k = len(images)
-
-#### Passa as imagens para escala de cinza
-
-for i in range(200):
-	O_soldas_boas[i] = cv2.cvtColor(O_soldas_boas[i], cv2.COLOR_BGR2GRAY)
-
-for i in range(200):
-	# O_soldas_boas[i] = cv2.cvtColor(O_soldas_boas[i], cv2.COLOR_BGR2GRAY)
-	O_soldas_ponte[i] = cv2.cvtColor(O_soldas_ponte[i], cv2.COLOR_BGR2GRAY)
-	O_soldas_ausente[i] = cv2.cvtColor(O_soldas_ausente[i], cv2.COLOR_BGR2GRAY)
-	O_soldas_excesso[i] = cv2.cvtColor(O_soldas_excesso[i], cv2.COLOR_BGR2GRAY)
-	O_soldas_pouca[i] = cv2.cvtColor(O_soldas_pouca[i], cv2.COLOR_BGR2GRAY)
 
 dwtService = DwtService()
 ###########################################

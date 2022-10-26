@@ -3,14 +3,16 @@ import numpy as np
 import cv2
 from csv import reader
 import imageio
+import sys
 
-from dwt_service import DwtService
+sys.path.append('../')
+from backend.classification.service.filtros.dwt_service import DwtService
 
-CLASSIFICACAO_SOLDA_BOA = "Boa"
-CLASSIFICACAO_SOLDA_PONTE = "Ponte"
-CLASSIFICACAO_SOLDA_AUSENTE = "Ausente"
-CLASSIFICACAO_SOLDA_EXCESSO = "Excesso"
-CLASSIFICACAO_SOLDA_POUCA = "Pouca"
+CLASSIFICACAO_SOLDA_BOA = 0
+CLASSIFICACAO_SOLDA_PONTE = 1
+CLASSIFICACAO_SOLDA_AUSENTE = 2
+CLASSIFICACAO_SOLDA_EXCESSO = 3
+CLASSIFICACAO_SOLDA_POUCA = 4
 
 def carrega_img(pasta, lista, x): #Pasta de origem das imagens, lista que as imagens pertecem, numero de imagens
 	for i in range(x):
@@ -97,88 +99,64 @@ carrega_img('Soldas_ausente', O_soldas_ausente, 200)
 carrega_img('Soldas_excesso', O_soldas_excesso, 200)
 carrega_img('Soldas_pouca', O_soldas_pouca, 200)
 
-# # # # # # # # colocando em escala de cinza
-for i in range(200):
-	O_soldas_boas[i] = cv2.cvtColor(O_soldas_boas[i], cv2.COLOR_BGR2GRAY)
-
-for i in range(200):
-	# O_soldas_boas[i] = cv2.cvtColor(O_soldas_boas[i], cv2.COLOR_BGR2GRAY)
-	O_soldas_ponte[i] = cv2.cvtColor(O_soldas_ponte[i], cv2.COLOR_BGR2GRAY)
-	O_soldas_ausente[i] = cv2.cvtColor(O_soldas_ausente[i], cv2.COLOR_BGR2GRAY)
-	O_soldas_excesso[i] = cv2.cvtColor(O_soldas_excesso[i], cv2.COLOR_BGR2GRAY)
-	O_soldas_pouca[i] = cv2.cvtColor(O_soldas_pouca[i], cv2.COLOR_BGR2GRAY)
-
-corretas_boas = 0
-deu_ruim_boas = 0
-corretas_ponte = 0
-deu_ruim_ponte = 0
-corretas_ausente = 0
-deu_ruim_ausente = 0
-corretas_excesso = 0
-deu_ruim_excesso = 0
-corretas_pouca = 0
-deu_ruim_pouca = 0
+MRF = np.zeros((5, 5), dtype=float)
+TabelaBonita = [["" for x in range(6)]for x in range(6)]
+TabelaBonita[0][0] = '       '
+TabelaBonita[1][0] = 'Boa    '
+TabelaBonita[2][0] = 'Ponte  '
+TabelaBonita[3][0] = 'Ausente'
+TabelaBonita[4][0] = 'Excesso'
+TabelaBonita[5][0] = 'Pouca  '
+TabelaBonita[0][1] = 'Boa'
+TabelaBonita[0][2] = 'Ponte'
+TabelaBonita[0][3] = 'Ausente'
+TabelaBonita[0][4] = 'Excesso'
+TabelaBonita[0][5] = 'Pouca'
 dwtService = DwtService()
 for i in range(200):
     dwt_filtered_img = dwtService.dwt_filter(O_soldas_boas[i])
     lista_valores = dwtService.dwtSum(dwt_filtered_img)
     size = len(lista_soldas)
     classificacao = calculo(lista_valores, lista_soldas[0:int(1/5 * size)], lista_soldas[int(1/5 * size):int(2/5 * size)], lista_soldas[int(2/5 * size):int(3/5 * size)], lista_soldas[int(3/5 * size):int(4/5 * size)], lista_soldas[int(4/5 * size):int(size)])
-    if classificacao == CLASSIFICACAO_SOLDA_BOA:
-        corretas_boas += 1
-    else:
-        deu_ruim_boas += 1
+    MRF[0][classificacao] += 1
 
 for i in range(200):
     dwt_filtered_img = dwtService.dwt_filter(O_soldas_ponte[i])
     lista_valores = dwtService.dwtSum(dwt_filtered_img)
     size = len(lista_soldas)
     classificacao = calculo(lista_valores, lista_soldas[0:int(1/5 * size)], lista_soldas[int(1/5 * size):int(2/5 * size)], lista_soldas[int(2/5 * size):int(3/5 * size)], lista_soldas[int(3/5 * size):int(4/5 * size)], lista_soldas[int(4/5 * size):int(size)])
-    if classificacao == CLASSIFICACAO_SOLDA_PONTE:
-        corretas_ponte += 1
-    else:
-        deu_ruim_ponte += 1
+    MRF[1][classificacao] += 1
 
 for i in range(200):
     dwt_filtered_img = dwtService.dwt_filter(O_soldas_ausente[i])
     lista_valores = dwtService.dwtSum(dwt_filtered_img)
     size = len(lista_soldas)
     classificacao = calculo(lista_valores, lista_soldas[0:int(1/5 * size)], lista_soldas[int(1/5 * size):int(2/5 * size)], lista_soldas[int(2/5 * size):int(3/5 * size)], lista_soldas[int(3/5 * size):int(4/5 * size)], lista_soldas[int(4/5 * size):int(size)])
-    if classificacao == CLASSIFICACAO_SOLDA_AUSENTE:
-        corretas_ausente += 1
-    else:
-        deu_ruim_ausente += 1
+    MRF[2][classificacao] += 1
 
 for i in range(200):
     dwt_filtered_img = dwtService.dwt_filter(O_soldas_excesso[i])
     lista_valores = dwtService.dwtSum(dwt_filtered_img)
     size = len(lista_soldas)
     classificacao = calculo(lista_valores, lista_soldas[0:int(1/5 * size)], lista_soldas[int(1/5 * size):int(2/5 * size)], lista_soldas[int(2/5 * size):int(3/5 * size)], lista_soldas[int(3/5 * size):int(4/5 * size)], lista_soldas[int(4/5 * size):int(size)])
-    if classificacao == CLASSIFICACAO_SOLDA_EXCESSO:
-        corretas_excesso += 1
-    else:
-        deu_ruim_excesso += 1
+    MRF[3][classificacao] += 1
 
 for i in range(200):
     dwt_filtered_img = dwtService.dwt_filter(O_soldas_pouca[i])
     lista_valores = dwtService.dwtSum(dwt_filtered_img)
     size = len(lista_soldas)
     classificacao = calculo(lista_valores, lista_soldas[0:int(1/5 * size)], lista_soldas[int(1/5 * size):int(2/5 * size)], lista_soldas[int(2/5 * size):int(3/5 * size)], lista_soldas[int(3/5 * size):int(4/5 * size)], lista_soldas[int(4/5 * size):size])
-    if classificacao == CLASSIFICACAO_SOLDA_POUCA:
-        corretas_pouca += 1
-    else:
-        deu_ruim_pouca += 1
+    MRF[4][classificacao] += 1
+
+for x in range(5):
+    for y in range(5):
+        MRF[x][y] = (MRF[x][y] * 100) / 200
+        TabelaBonita[x+1][y+1] = f'{MRF[x][y]}%'
 
 print("Resutaldo Final: ")
-print(f"Corretas boas: {corretas_boas}")
-print(f"Deu ruim boas: {deu_ruim_boas}")
-print(f"Corretas ponte: {corretas_ponte}")
-print(f"Deu ruim ponte: {deu_ruim_ponte}")
-print(f"Corretas ausente: {corretas_ausente}")
-print(f"Deu ruim ausente: {deu_ruim_ausente}")
-print(f"Corretas excesso: {corretas_excesso}")
-print(f"Deu ruim excesso: {deu_ruim_excesso}")
-print(f"Corretas pouca: {corretas_pouca}")
-print(f"Deu ruim pouca: {deu_ruim_pouca}")
-print(f"Corretas total: {corretas_boas + corretas_ponte + corretas_ausente + corretas_excesso + corretas_pouca}")
-print(f"Deu ruim total: {deu_ruim_boas + deu_ruim_ponte + deu_ruim_ausente + deu_ruim_excesso + deu_ruim_pouca}")
+# print(MRF)
+for x in range(6):
+    linha = ""
+    for y in range(6):
+        linha += f'{TabelaBonita[x][y]}\t'
+    print(linha)
