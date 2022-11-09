@@ -1,14 +1,10 @@
 import pandas as pd
-import cv2
 import numpy as np
-from skimage.filters import gabor_kernel
 import imageio
 import sys
 
 sys.path.append('../')
 from backend.classification.service.filtros.dct_service import DctService
-#import os
-#from PIL import Image
 
 ###Carrega as imagens
 
@@ -42,8 +38,6 @@ carrega_img('Soldas_ponte', O_soldas_ponte, 200)
 carrega_img('Soldas_ausente', O_soldas_ausente, 200)
 carrega_img('Soldas_excesso', O_soldas_excesso, 200)
 carrega_img('Soldas_pouca', O_soldas_pouca, 200)
-
-#k = len(images)
 
 dctService = DctService()
 ###########################################

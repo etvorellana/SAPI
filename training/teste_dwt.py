@@ -1,6 +1,4 @@
-from random import shuffle
 import numpy as np
-import cv2
 from csv import reader
 import imageio
 import sys
