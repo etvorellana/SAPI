@@ -1,4 +1,8 @@
 __pycache__
+classif-env
 
 # Imagens de teste
-Soldas_*
+Solda_*.png
+
+.ipynb_checkpoints
+.DS_Store

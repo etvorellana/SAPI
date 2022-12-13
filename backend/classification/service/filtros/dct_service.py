@@ -20,10 +20,13 @@ class DctService():
         minValue = np.min(img_solda)
         maxValue = np.max(img_solda)
         return soma, media, desvio, minValue, maxValue
+        #return desvio, minValue
 
     def dctSum(self, img):
         soma_dct, media, desvio_dct, minValue, maxValue = self.operacao_dct(img)
+        #desvio_dct, minValue = self.operacao_dct(img)
         lista_valores = np.zeros(5)
+        #lista_valores = np.zeros(2)
         lista_valores[0] = soma_dct
         lista_valores[1] = media
         lista_valores[2] = desvio_dct
