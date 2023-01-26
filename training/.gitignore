@@ -4,5 +4,8 @@ classif-env
 # Imagens de teste
 Solda_*.png
 
+# .csv de treinamento
+*KF*.csv
+
 .ipynb_checkpoints
 .DS_Store

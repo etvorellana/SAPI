@@ -180,7 +180,7 @@ def aumentation(imagem, nome = "Solda_", cont = 1):
     return cont
 
 def main():
-    imagem = cv.imread("solda_ausente.png")
+    imagem = cv.imread("ausente.png")
     print (imagem.shape)
     altura, largura = imagem.shape[:2]
     # Gravando a imagem original
